@@ -2,10 +2,8 @@
         run: |
           git config --global user.name "GitHub Action"
           git config --global user.email "action@github.com"
-          git fetch origin main
-          git pull origin main --rebase # This clears the traffic jam
           git add index.html
-          git commit -m "Auto-updated game index" || exit 0
-          git push origin main
+          git commit -m "Auto-update index.html" || exit 0
+          git push origin main --force # This forces the change through
 
 
