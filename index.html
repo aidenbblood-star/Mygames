@@ -1,0 +1,25 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Game Stash</title>
+    <style>
+        body { font-family: sans-serif; display: flex; height: 100vh; margin: 0; background: #111; color: white; }
+        #sidebar { width: 260px; background: #222; padding: 20px; overflow-y: auto; border-right: 2px solid #444; }
+        #game-container { flex-grow: 1; border: none; background: #000; }
+        button { display: block; width: 100%; padding: 12px; margin-bottom: 8px; cursor: pointer; background: #333; color: white; border: 1px solid #555; border-radius: 6px; text-align: left; }
+        button:hover { background: #444; border-color: #00bcff; }
+        h2 { color: #00bcff; margin-top: 0; }
+    </style>
+</head>
+<body>
+    <div id="sidebar">
+        <h2>🎮 All Games</h2>
+        
+    </div>
+    <iframe id="game-container" src=""></iframe>
+    <script>
+        function loadGame(path) { document.getElementById('game-container').src = path; }
+    </script>
+</body>
+</html>
