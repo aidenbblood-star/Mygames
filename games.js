@@ -61,21 +61,29 @@ function loadGames() {
                 btn.className = 'game-btn';
                 btn.innerText = folderName.replace(/-/g, ' ').toUpperCase();
                 
-                btn.onclick = () => {
-    const url = `https://cdn.jsdelivr.net/gh/${GITHUB_USERNAME}/${REPO_NAME}@main/${GAMES_FOLDER}/${folderName}/index.html`;
+               btn.onclick = () => {
+    const baseUrl = `https://cdn.jsdelivr.net/gh/${GITHUB_USERNAME}/${REPO_NAME}@main/${GAMES_FOLDER}/${folderName}/`;
+    const url = baseUrl + 'index.html';
 
     fetch(url)
         .then(res => res.text())
         .then(code => {
-            // This is the magic "UGS" trick:
-            // It turns the raw text into a playable web object
-            const blob = new Blob([code], { type: 'text/html' });
-            const blobUrl = URL.createObjectURL(blob);
-            
-            // This opens the game in a new tab as a functional site
-            window.open(blobUrl, '_blank');
+            // 1. Open a completely blank new tab immediately
+            const win = window.open('about:blank', '_blank');
+
+            // 2. Add a <base> tag so the game finds its images/scripts on jsDelivr
+            // Without this, the game's art and sounds will be broken
+            const renderedCode = `<base href="${baseUrl}">${code}`;
+
+            // 3. Manually write the code into the new tab's document
+            // This forces the browser to render it as HTML
+            win.document.open();
+            win.document.write(renderedCode);
+            win.document.close();
         })
-        .catch(err => alert("Game failed to load. Check your file paths!"));
+        .catch(err => console.error("Error loading game:", err));
+};
+
 };
 
                 };
