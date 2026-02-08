@@ -62,8 +62,22 @@ function loadGames() {
                 btn.innerText = folderName.replace(/-/g, ' ').toUpperCase();
                 
                 btn.onclick = () => {
-                    const url = `https://cdn.jsdelivr.net/gh/${GITHUB_USERNAME}/${REPO_NAME}@main/${GAMES_FOLDER}/${folderName}/index.html`;
-                    window.open(url, '_blank');
+    const url = `https://cdn.jsdelivr.net{GITHUB_USERNAME}/${REPO_NAME}@main/${GAMES_FOLDER}/${folderName}/index.html`;
+
+    fetch(url)
+        .then(res => res.text())
+        .then(code => {
+            // This is the magic "UGS" trick:
+            // It turns the raw text into a playable web object
+            const blob = new Blob([code], { type: 'text/html' });
+            const blobUrl = URL.createObjectURL(blob);
+            
+            // This opens the game in a new tab as a functional site
+            window.open(blobUrl, '_blank');
+        })
+        .catch(err => alert("Game failed to load. Check your file paths!"));
+};
+
                 };
                 section.appendChild(btn);
             });
