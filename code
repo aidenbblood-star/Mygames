@@ -1,0 +1,85 @@
+// CONFIGURATION: Updated for your specific repository
+const GITHUB_USERNAME = 'aidenbblood-star';
+const REPO_NAME = 'Mygames';
+const GAMES_FOLDER = 'games'; 
+
+async function fetchMyGames() {
+    try {
+        // This specifically looks inside your 'games' folder
+        const response = await fetch(`https://api.github.com{GITHUB_USERNAME}/${REPO_NAME}/contents/${GAMES_FOLDER}`);
+        const data = await response.json();
+
+        if (!Array.isArray(data)) {
+            console.error("Could not find the 'games' folder. Check your folder name on GitHub!");
+            return [];
+        }
+
+        return data
+            .filter(file => file.type === 'file')
+            .map(file => ({
+                name: file.name, 
+                // Links directly to the file inside the games folder
+                link: `https://${GITHUB_USERNAME}.github.io/${REPO_NAME}/${GAMES_FOLDER}/${file.name}`
+            }));
+    } catch (error) {
+        console.error("Error fetching games:", error);
+        return [];
+    }
+}
+
+async function loadGames() {
+    const sidebar = document.getElementById('sidebar');
+    const container = document.getElementById('sections-container');
+    const alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+
+    const myGames = await fetchMyGames();
+
+    // Sort games alphabetically by name
+    myGames.sort((a, b) => a.name.localeCompare(b.name, undefined, {sensitivity: 'base'}));
+
+    alphabet.forEach(letter => {
+        const filteredGames = myGames.filter(g => {
+            const firstChar = g.name.charAt(0).toUpperCase();
+            return firstChar === letter;
+        });
+        
+        // Create Sidebar Button
+        const sideBtn = document.createElement('button');
+        sideBtn.className = `sidebar-btn ${filteredGames.length === 0 ? 'empty' : ''}`;
+        sideBtn.innerText = letter;
+        if (filteredGames.length > 0) {
+            sideBtn.onclick = () => {
+                const target = document.getElementById(`section-${letter}`);
+                if (target) target.scrollIntoView({behavior: 'smooth'});
+            };
+        }
+        sidebar.appendChild(sideBtn);
+
+        // Create Main Content Section
+        const section = document.createElement('div');
+        section.id = `section-${letter}`;
+        section.className = `letter-section ${filteredGames.length === 0 ? 'empty' : ''}`;
+        section.innerHTML = `<div class="letter-header">${letter}</div>`;
+        
+        const buttonsDiv = document.createElement('div');
+        buttonsDiv.className = 'buttons-container';
+
+        if (filteredGames.length === 0) {
+            buttonsDiv.innerHTML = `<div class="empty-message">No games starting with ${letter}</div>`;
+        } else {
+            filteredGames.forEach(game => {
+                const btn = document.createElement('input');
+                btn.type = 'button';
+                btn.value = game.name;
+                // Opens the game in a new tab
+                btn.onclick = () => window.open(game.link, '_blank');
+                buttonsDiv.appendChild(btn);
+            });
+        }
+        section.appendChild(buttonsDiv);
+        container.appendChild(section);
+    });
+}
+
+// Kick off the loading process
+document.addEventListener('DOMContentLoaded', loadGames);
