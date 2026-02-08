@@ -50,7 +50,7 @@ function generateAllSections() {
                 btn.value = folderName.replace(/-/g, ' ').toUpperCase();
                 
               btn.onclick = () => {
-    const baseUrl = `https://cdn.jsdelivr.net{GITHUB_USERNAME}/${REPO_NAME}@main/${GAMES_FOLDER}/${folderName}/`;
+    const baseUrl = `https://cdn.jsdelivr.net/gh/${GITHUB_USERNAME}/${REPO_NAME}@main/${GAMES_FOLDER}/${folderName}/`;
     const fullUrl = `${baseUrl}index.html`;
 
     fetch(fullUrl)
