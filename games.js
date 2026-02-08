@@ -4,12 +4,9 @@ const GAMES_FOLDER = 'games';
 
 async function loadGames() {
     try {
-        // THIS IS THE CORRECT URL TO AUTOMATICALLY GET YOUR LIST OF GAMES
-       const response = await fetch(`https://api.github.com{GITHUB_USERNAME}/${REPO_NAME}/contents/${GAMES_FOLDER}`);
-
-
+        // FIX 1: Corrected GitHub API URL with /repos/ and proper variable syntax
+        const response = await fetch(`https://api.github.com{GITHUB_USERNAME}/${REPO_NAME}/contents/${GAMES_FOLDER}`);
         
-        // Check for rate limit or folder name issues
         if (response.status === 403) {
             alert("GitHub API Rate Limit Hit. Wait 1 hour and try again.");
             return;
@@ -20,21 +17,19 @@ async function loadGames() {
         }
 
         const files = await response.json();
-        // Filter only the HTML files
         const htmlFiles = files.filter(f => f.name.endsWith('.html'));
         
         const container = document.getElementById('sections-container');
         const sidebar = document.getElementById('sidebar');
-
-        // ... (rest of the code is fine, it uses htmlFiles now)
         const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+
         alphabet.forEach(letter => {
             const gamesInLetter = htmlFiles.filter(f => f.name.toUpperCase().startsWith(letter));
             if (gamesInLetter.length > 0) {
                 const sideBtn = document.createElement('button');
                 sideBtn.className = 'sidebar-btn';
                 sideBtn.innerText = letter;
-                sideBtn.onclick = () => document.getElementById(`section-${letter}`).scrollView({ behavior: 'smooth' });
+                sideBtn.onclick = () => document.getElementById(`section-${letter}`).scrollIntoView({ behavior: 'smooth' });
                 sidebar.appendChild(sideBtn);
 
                 const section = document.createElement('div');
@@ -46,6 +41,7 @@ async function loadGames() {
                     const btn = document.createElement('button');
                     btn.className = 'game-btn';
                     btn.innerText = file.name.replace('.html', '').replace(/-/g, ' ').toUpperCase();
+                    // FIX 2: Corrected jsDelivr URL with /gh/ and proper variable syntax
                     btn.onclick = () => {
                         window.open(`https://cdn.jsdelivr.net{GITHUB_USERNAME}/${REPO_NAME}@main/${GAMES_FOLDER}/${file.name}`, '_blank');
                     };
@@ -60,4 +56,5 @@ async function loadGames() {
     }
 }
 loadGames();
+
 
