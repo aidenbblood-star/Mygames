@@ -43,7 +43,7 @@ async function loadGames() {
                     btn.innerText = file.name.replace('.html', '').replace(/-/g, ' ').toUpperCase();
                     // FIX 2: Corrected jsDelivr URL with /gh/ and proper variable syntax
                     btn.onclick = () => {
-                        window.open(`https://cdn.jsdelivr.net{GITHUB_USERNAME}/${REPO_NAME}@main/${GAMES_FOLDER}/${file.name}`, '_blank');
+                        window.open(`https://cdn.jsdelivr.net/gh/${GITHUB_USERNAME}/${REPO_NAME}@main/${GAMES_FOLDER}/${file.name}`, '_blank');
                     };
                     section.appendChild(btn);
                 });
