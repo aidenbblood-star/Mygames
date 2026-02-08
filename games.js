@@ -82,11 +82,7 @@ function loadGames() {
             win.document.close();
         })
         .catch(err => console.error("Error loading game:", err));
-};
 
-};
-
-                };
                 section.appendChild(btn);
             });
             container.appendChild(section);
