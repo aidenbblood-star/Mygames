@@ -1,4 +1,4 @@
-const GITHUB_USERNAME = 'aidenbblood-star';
+const GITHUB_USERNAME = 'aidenbblood-star'; alert("Script is running!");
 const REPO_NAME = 'Mygames';
 const GAMES_FOLDER = 'games'; 
 
