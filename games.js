@@ -49,36 +49,26 @@ function generateAllSections() {
                 btn.className = 'game-btn'; // Matches your CSS
                 btn.value = folderName.replace(/-/g, ' ').toUpperCase();
                 
-              btn.onclick = () => {
-    const baseUrl = `https://cdn.jsdelivr.net/gh/${GITHUB_USERNAME}/${REPO_NAME}@main/${GAMES_FOLDER}/${folderName}/`;
-    const fullUrl = `${baseUrl}index.html`;
+                btn.onclick = () => {
+                    // This builds the path to your specific game file
+                    const baseUrl = `https://cdn.jsdelivr.net/gh/${GITHUB_USERNAME}/${REPO_NAME}@main/${GAMES_FOLDER}/${folderName}/`;
+                    const fullUrl = `${baseUrl}index.html?t=${Date.now()}`;
 
-    fetch(fullUrl)
-        .then(response => {
-            if (!response.ok) throw new Error('Network response was not ok');
-            return response.text();
-        })
-        .then(html => {
-            // 1. Inject the <base> tag so the game can find its scripts/images on jsDelivr
-            const playableCode = `<base href="${baseUrl}">${html}`;
-
-            // 2. Create a BLOB (Binary Large Object) and EXPLICITLY set it to HTML
-            // This is the step that stops the "show as code" problem
-            const blob = new Blob([playableCode], { type: 'text/html' });
-            
-            // 3. Create a unique temporary URL for this blob
-            const blobUrl = URL.createObjectURL(blob);
-
-            // 4. Open that temporary URL in a new tab
-            window.open(blobUrl, '_blank');
-        })
-        .catch(err => {
-            console.error('Error:', err);
-            alert("Failed to load game. Make sure the file exists at: " + fullUrl);
-        });
-};
-
-                    
+                    fetch(fullUrl)
+                        .then(response => response.text())
+                        .then(text => {
+                            const newWin = window.open("about:blank", "_blank");
+                            if (newWin) {
+                                // THE SECRET: Injecting a <base> tag so the game finds its art/scripts
+                                const content = `<base href="${baseUrl}">${text}`;
+                                newWin.document.open();
+                                newWin.document.write(content);
+                                newWin.document.close();
+                            } else {
+                                alert("Pop-up blocked! Please allow pop-ups for this site.");
+                            }
+                        })
+                        .catch(err => console.error("Load error:", err));
                 };
                 buttonsContainer.appendChild(btn);
             });
@@ -120,4 +110,3 @@ function generateSidebar(allChars, filesByChar) {
 
 // Call the function to start
 generateAllSections();
-
