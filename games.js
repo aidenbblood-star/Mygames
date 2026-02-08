@@ -5,7 +5,7 @@ const GAMES_FOLDER = 'games';
 async function loadGames() {
     try {
         // FIX 1: Corrected GitHub API URL with /repos/ and proper variable syntax
-        const response = await fetch(`https://api.github.com{GITHUB_USERNAME}/${REPO_NAME}/contents/${GAMES_FOLDER}`);
+        const response = await fetch(`https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/contents/${GAMES_FOLDER}`);
         
         if (response.status === 403) {
             alert("GitHub API Rate Limit Hit. Wait 1 hour and try again.");
