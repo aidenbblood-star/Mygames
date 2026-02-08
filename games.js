@@ -6,6 +6,7 @@ async function loadGames() {
     try {
         // THIS IS THE CORRECT URL TO AUTOMATICALLY GET YOUR LIST OF GAMES
         const response = await fetch(`https://api.github.com{GITHUB_USERNAME}/${REPO_NAME}/contents/${GAMES_FOLDER}`);
+
         
         // Check for rate limit or folder name issues
         if (response.status === 403) {
