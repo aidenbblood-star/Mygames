@@ -176,7 +176,7 @@ function loadGames() {
                 btn.innerText = folderName.replace(/-/g, ' ').toUpperCase();
                 
                 btn.onclick = () => {
-                    const url = `https://cdn.jsdelivr.net{GITHUB_USERNAME}/${REPO_NAME}@main/${GAMES_FOLDER}/${folderName}/index.html`;
+                    const url = `https://cdn.jsdelivr.net/gh/${GITHUB_USERNAME}/${REPO_NAME}@main/${GAMES_FOLDER}/${folderName}/index.html`;
                     window.open(url, '_blank');
                 };
                 section.appendChild(btn);
