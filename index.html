@@ -15,7 +15,7 @@
         .game-search:focus { outline: none; border-color: #00f2ff; box-shadow: 0 0 15px rgba(0, 242, 255, 0.4); } 
         
         /* Game Buttons */
-        .game-btn { background: #0f0f0f; border: 1px solid #222; padding: 18px; border-radius: 12px; cursor: pointer; color: #eee; width: 100%; margin-bottom: 12px; transition: 0.3s; font-weight: bold; } 
+        .game-btn { background: #0f0f0f; border: 1px solid #222; padding: 18px; border-radius: 12px; cursor: pointer; color: #eee; width: 100%; margin-bottom: 12px; transition: 0.3s; font-weight: bold; text-align: center; } 
         .game-btn:hover { color: #00f2ff; border-color: #00f2ff; box-shadow: 0 0 20px rgba(0, 242, 255, 0.6); }
         
         /* Fullscreen Game Overlay */
@@ -44,55 +44,61 @@
         <div id="sections-container"></div>
     </div>
     
-   <script>
+<script>
 const USER = "aidenbblood-star";
 const REPO = "Mygames";
-const FOLDER = "games";
+const GAME_FOLDERS = ["games", "UGS-Files"];
 
-// The 5 games that appear at the top
+// The games that stay at the top
 let favorites = ["1v1lol", "retrobowl", "slope", "drivemad", "bitlife"];
 
-// Your full list of games
-let files = ["1v1lol", "2048", "adarkroom", "asciispace", "assessmentexamination", "asteroids", "astray", "backcountry", "baldisbasics", "basketballlegends", "basketballstars", "basketbrosio", "basketrandom", "bitlife", "blackholesquare", "bounceback", "boxingrandom", "breaklock", "breakout", "btd4", "captaincallisto", "chess", "chromaincident", "chromedino", "clickerheroes", "clusterrush", "connect3", "cookieclicker", "crossyroad", "csgoclicker", "cubefield", "cubitomayhem", "cuttherope", "cuttheropeholiday", "cuttheropetimetravel", "deathrun3d", "deepestsword", "doodlejump", "doom", "drawthehill", "drift", "drifthunters", "drivemad", "ducklife", "ducklife2", "ducklife3", "ducklife4", "ducklife5", "earntodie", "edgenotfound", "eggycar", "evilglitch", "factoryballsforever", "fireboyandwatergirlforesttemple", "flappy2048", "flappybird", "flappyplane", "flightsimulator", "fridaynightfunkin", "friendlyfire", "fruitninja", "geometrydash", "getawayshootoutnew", "gladihoppers", "googlesnake", "gopherkart", "grindcraft", "hexgl", "hextris", "highwaytraffic", "konnekt", "learntofly", "letssurf", "littlealchemy", "mergeroundracers", "monkeymart", "motoroadrash3d", "motox3m", "ninjavsevilcorp", "omnombounce", "ovo", "ovo2", "packabunchas", "pacman", "paperio", "particleclicker", "pushback", "q1k3", "r3", "racer", "radiusraid", "redball4", "retrobowl", "retrohaunt", "riddleschool2", "ritz", "roadblocks", "rooftopsnipers", "run3", "scrapmetal3", "shuttledeck", "sketchbook04", "sleepingbeauty", "slitherio", "slope", "slope2", "snake", "snowbattle", "soccerrandom", "solitaire", "spacecompany", "spacegarden", "spacehuggers", "spaceinvaders", "stack", "stackball", "stickman-hook", "stickmanboost", "stickmanclimb", "stickmangolf", "stickmanhook", "stickmansurvival", "subwaysurfers", "subwaysurfersny", "subwaysurferssingapore", "tanukisunset", "tetris", "themazeofspacegoblins", "timeshooter", "timeshooter2", "timeshooter3", "tinyfishing", "tombofthemask", "topspeedracing3d", "towermaster", "trimps", "tunnelrush", "vex3", "vex4", "vex5", "vex6", "worldshardestgame2", "zombsroyale"]; 
-
-function loadGames() {
+async function loadGames() {
     const container = document.getElementById('sections-container');
     const favContainer = document.getElementById('favorites-container');
     
-    // Load Favorites First
-    favorites.forEach(name => {
-        const btn = document.createElement('button');
-        btn.className = 'game-btn'; 
-        btn.style.borderColor = "#ffd700"; 
-        btn.innerText = "★ " + name.replace(/-/g, ' ').toUpperCase();
-        btn.onclick = () => launchGame(name);
-        favContainer.appendChild(btn);
-    });
+    for (const folder of GAME_FOLDERS) {
+        try {
+            // FIXED: Added /repos/ to the GitHub API URL
+            const response = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/${folder}`);
+            if (!response.ok) continue;
+            const items = await response.json();
 
-    // Load All Games
-    files.forEach(name => {
-        const btn = document.createElement('button');
-        btn.className = 'game-btn'; 
-        btn.innerText = name.replace(/-/g, ' ').toUpperCase();
-        btn.onclick = () => launchGame(name);
-        container.appendChild(btn);
-    });
+            items.forEach(item => {
+                if (item.type === "dir") { 
+                    const name = item.name;
+                    const btn = document.createElement('button');
+                    btn.className = 'game-btn';
+                    
+                    if (favorites.includes(name)) {
+                        btn.style.borderColor = "#ffd700";
+                        btn.innerText = "★ " + name.replace(/-/g, ' ').toUpperCase();
+                        favContainer.appendChild(btn);
+                    } else {
+                        btn.innerText = name.replace(/-/g, ' ').toUpperCase();
+                        container.appendChild(btn);
+                    }
+
+                    btn.onclick = () => launchGame(name, folder);
+                }
+            });
+        } catch (err) {
+            console.error(`Error loading ${folder}:`, err);
+        }
+    }
 }
 
-async function launchGame(name) {
-    // Exact CDN path to the index.html
-    const url = `https://fastly.jsdelivr.net/gh/${USER}/${REPO}@main/${FOLDER}/${name}/index.html`;
+async function launchGame(name, sourceFolder) {
+    // FIXED: Added /gh/ to the jsDelivr URLs
+    const url = `https://fastly.jsdelivr.net/gh/${USER}/${REPO}@main/${sourceFolder}/${name}/index.html`;
+    const baseHref = `https://cdn.jsdelivr.net/gh/${USER}/${REPO}@main/${sourceFolder}/${name}/`;
     
     try {
         const response = await fetch(url);
-        if (!response.ok) throw new Error("Could not reach GitHub");
+        if (!response.ok) throw new Error("File not found");
         let html = await response.text();
         
-        // This line tells the game: "Find all your other files on GitHub!"
-        const baseHref = `https://cdn.jsdelivr.net/gh/${USER}/${REPO}@main/${FOLDER}/${name}/`;
         const baseTag = `<base href="${baseHref}">`;
         
-        // Inject the base tag right after <head>
         if (html.includes('<head>')) {
             html = html.replace('<head>', `<head>${baseTag}`);
         } else {
@@ -106,7 +112,7 @@ async function launchGame(name) {
         document.getElementById('game-overlay').style.display = 'block';
     } catch (err) {
         console.error("Game load failed:", err);
-        alert("Game failed to load. Check your internet or if GitHub is down.");
+        alert("Game failed to load. Check if the folder name is correct in GitHub.");
     }
 }
 
@@ -115,7 +121,6 @@ function closeGame() {
     document.getElementById('game-frame').src = "";
 }
 
-// Search Logic
 document.getElementById('game-search').addEventListener('input', (e) => {
     const val = e.target.value.toLowerCase();
     document.querySelectorAll('.game-btn').forEach(btn => {
