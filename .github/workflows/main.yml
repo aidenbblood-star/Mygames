@@ -1,9 +1,0 @@
-      - name: Save Updated Site
-        run: |
-          git config --global user.name "GitHub Action"
-          git config --global user.email "action@github.com"
-          git add index.html
-          git commit -m "Auto-update index.html" || exit 0
-          git push origin main --force # This forces the change through
-
-
