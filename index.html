@@ -90,7 +90,7 @@ async function fetchFromGitHub(folderPath, isFolderMode) {
 
 function launchDirect(url, folder, name) {
     const frame = document.getElementById('game-frame');
-   const baseHref = b'https://cdn.jsdelivr.net/gh/${USER}/${REPO}@main/${folder}/${name}/';
+   const baseHref = 'https://cdn.jsdelivr.net/gh/${USER}/${REPO}@main/${folder}/${name}/';
     
     // We fetch the HTML to inject the <base> tag so images/scripts still load correctly
     fetch(url).then(res => res.text()).then(html => {
