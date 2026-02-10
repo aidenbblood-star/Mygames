@@ -36,77 +36,70 @@
         <h2 style="color: #444;">All Games</h2>
         <div id="sections-container"></div>
     </div>
-    
-<script>
+<script>    
 const USER = "aidenbblood-star";
 const REPO = "Mygames";
-// FIXED: This list now uses the exact folder name from your screenshot
-const GAME_FOLDERS = [
-    "games", 
-    "aidenbblood-star ugs singlefile main UGS-Files"
-];
+// Make sure this name matches your long folder name EXACTLY
+const UGS_FOLDER = "aidenbblood-star ugs singlefile main UGS-Files";
+const GAMES_FOLDER = "games";
 
 let favorites = ["1v1lol", "retrobowl", "slope", "drivemad", "bitlife"];
 
 async function loadGames() {
     const container = document.getElementById('sections-container');
     const favContainer = document.getElementById('favorites-container');
-    
-    for (const folder of GAME_FOLDERS) {
-        try {
-            // Encode the URL to handle the spaces in your folder name
-            const response = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/${encodeURIComponent(folder)}`);
-            if (!response.ok) continue;
-            const items = await response.json();
 
-            items.forEach(item => {
-                if (item.type === "dir") { 
-                    const name = item.name;
-                    const btn = document.createElement('button');
-                    btn.className = 'game-btn';
-                    
-                    if (favorites.includes(name)) {
-                        btn.style.borderColor = "#ffd700";
-                        btn.innerText = "★ " + name.replace(/-/g, ' ').toUpperCase();
-                        favContainer.appendChild(btn);
-                    } else {
-                        btn.innerText = name.replace(/-/g, ' ').toUpperCase();
-                        container.appendChild(btn);
-                    }
+    // 1. Load your original 'games' (which are in folders)
+    await fetchFromGitHub(GAMES_FOLDER, true);
 
-                    btn.onclick = () => launchGame(name, folder);
-                }
-            });
-        } catch (err) {
-            console.error(`Error loading ${folder}:`, err);
-        }
-    }
+    // 2. Load the 'UGS-Files' (which are individual html files)
+    await fetchFromGitHub(UGS_FOLDER, false);
 }
 
-async function launchGame(name, sourceFolder) {
-    // Encodes the folder path so jsDelivr understands the spaces
-    const url = `https://fastly.jsdelivr.net/gh/${USER}/${REPO}@main/${encodeURIComponent(sourceFolder)}/${name}/index.html`;
-    const baseHref = `https://cdn.jsdelivr.net/gh/${USER}/${REPO}@main/${encodeURIComponent(sourceFolder)}/${name}/`;
-    
+async function fetchFromGitHub(folderPath, isFolderMode) {
+    const container = document.getElementById('sections-container');
     try {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error("File not found");
-        let html = await response.text();
-        const baseTag = `<base href="${baseHref}">`;
-        
-        if (html.includes('<head>')) {
-            html = html.replace('<head>', `<head>${baseTag}`);
-        } else {
-            html = baseTag + html;
-        }
+        const response = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/${encodeURIComponent(folderPath)}`);
+        if (!response.ok) return;
+        const items = await response.json();
 
-        const blob = new Blob([html], { type: 'text/html' });
-        document.getElementById('game-frame').src = URL.createObjectURL(blob);
+        items.forEach(item => {
+            let gameName = "";
+            let launchUrl = "";
+
+            if (isFolderMode && item.type === "dir") {
+                // For 'games' folder: look for subfolders
+                gameName = item.name;
+                launchUrl = `https://fastly.jsdelivr.net/gh/${USER}/${REPO}@main/${folderPath}/${gameName}/index.html`;
+            } else if (!isFolderMode && item.name.endsWith(".html")) {
+                // For 'UGS-Files': look for .html files
+                gameName = item.name.replace(".html", "");
+                launchUrl = `https://fastly.jsdelivr.net/gh/${USER}/${REPO}@main/${folderPath}/${item.name}`;
+            }
+
+            if (gameName) {
+                const btn = document.createElement('button');
+                btn.className = 'game-btn';
+                btn.innerText = gameName.replace(/-/g, ' ').toUpperCase();
+                btn.onclick = () => launchDirect(launchUrl, folderPath, gameName);
+                container.appendChild(btn);
+            }
+        });
+    } catch (err) { console.error("Load failed for " + folderPath, err); }
+}
+
+function launchDirect(url, folder, name) {
+    const frame = document.getElementById('game-frame');
+    const baseHref = `https://cdn.jsdelivr.net{USER}/${REPO}@main/${folder}/${name}/`;
+    
+    // We fetch the HTML to inject the <base> tag so images/scripts still load correctly
+    fetch(url).then(res => res.text()).then(html => {
+        const baseTag = `<base href="${baseHref}">`;
+        const fullHtml = html.includes('<head>') ? html.replace('<head>', `<head>${baseTag}`) : baseTag + html;
+        const blob = new Blob([fullHtml], { type: 'text/html' });
+        frame.src = URL.createObjectURL(blob);
         document.getElementById('game-overlay').style.display = 'block';
-    } catch (err) {
-        console.error("Game load failed:", err);
-        alert("Game failed to load. Check your folder names!");
-    }
+    }).catch(err => alert("Game failed to load."));
 }
 
 function closeGame() {
@@ -114,14 +107,8 @@ function closeGame() {
     document.getElementById('game-frame').src = "";
 }
 
-document.getElementById('game-search').addEventListener('input', (e) => {
-    const val = e.target.value.toLowerCase();
-    document.querySelectorAll('.game-btn').forEach(btn => {
-        btn.style.display = btn.innerText.toLowerCase().includes(val) ? "block" : "none";
-    });
-});
-
 loadGames();
+
 </script>
 </body>
 </html>
