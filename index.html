@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <title>Ultimate Game Stash</title>
+    <style>
+        /* Your Cool Black & Neon Theme */
+        body { font-family: 'Segoe UI', sans-serif; background: #050505; color: #ffffff; margin: 0; display: flex; justify-content: center; } 
+        .main-content { flex: 1; padding: 30px; max-width: 1200px; } 
+        h1 { text-align: center; font-size: 3rem; text-transform: uppercase; letter-spacing: -1px; margin-bottom: 30px; } 
+        h2 { text-align: center; text-transform: uppercase; letter-spacing: 3px; margin-top: 40px; margin-bottom: 20px; }
+        
+        .search-container { text-align: center; margin-bottom: 40px; } 
+        .game-search { width: 80%; padding: 15px; background: #1a1a1a; border: 1px solid #333; border-radius: 10px; color: #fff; } 
+        .game-search:focus { outline: none; border-color: #00f2ff; box-shadow: 0 0 15px rgba(0, 242, 255, 0.4); } 
+        
+        /* Game Buttons */
+        .game-btn { background: #0f0f0f; border: 1px solid #222; padding: 18px; border-radius: 12px; cursor: pointer; color: #eee; width: 100%; margin-bottom: 12px; transition: 0.3s; font-weight: bold; } 
+        .game-btn:hover { color: #00f2ff; border-color: #00f2ff; box-shadow: 0 0 20px rgba(0, 242, 255, 0.6); }
+        
+        /* Fullscreen Game Overlay */
+        #game-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 100; }
+        #game-frame { width: 100%; height: 100%; border: none; }
+        .close-btn { position: absolute; top: 10px; right: 20px; padding: 10px 20px; background: #ff3e3e; color: white; cursor: pointer; border-radius: 5px; z-index: 101; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div id="game-overlay">
+        <div class="close-btn" onclick="closeGame()">CLOSE GAME</div>
+        <iframe id="game-frame"></iframe>
+    </div>
+
+    <div class="main-content">
+        <h1>Ultimate Game Stash</h1>
+        <div class="search-container">
+            <input type="text" id="game-search" class="game-search" placeholder="Search through 130+ games...">
+        </div>
+
+        <h2 style="color: #ffd700;">★ Top Picks ★</h2>
+        <div id="favorites-container" style="border-bottom: 1px solid #222; padding-bottom: 20px; margin-bottom: 20px;"></div>
+
+        <h2 style="color: #444;">All Games</h2>
+        <div id="sections-container"></div>
+    </div>
+    
+   <script>
+const USER = "aidenbblood-star";
+const REPO = "Mygames";
+const FOLDER = "games";
+
+// The 5 games that appear at the top
+let favorites = ["1v1lol", "retrobowl", "slope", "drivemad", "bitlife"];
+
+// Your full list of games
+let files = ["1v1lol", "2048", "adarkroom", "asciispace", "assessmentexamination", "asteroids", "astray", "backcountry", "baldisbasics", "basketballlegends", "basketballstars", "basketbrosio", "basketrandom", "bitlife", "blackholesquare", "bounceback", "boxingrandom", "breaklock", "breakout", "btd4", "captaincallisto", "chess", "chromaincident", "chromedino", "clickerheroes", "clusterrush", "connect3", "cookieclicker", "crossyroad", "csgoclicker", "cubefield", "cubitomayhem", "cuttherope", "cuttheropeholiday", "cuttheropetimetravel", "deathrun3d", "deepestsword", "doodlejump", "doom", "drawthehill", "drift", "drifthunters", "drivemad", "ducklife", "ducklife2", "ducklife3", "ducklife4", "ducklife5", "earntodie", "edgenotfound", "eggycar", "evilglitch", "factoryballsforever", "fireboyandwatergirlforesttemple", "flappy2048", "flappybird", "flappyplane", "flightsimulator", "fridaynightfunkin", "friendlyfire", "fruitninja", "geometrydash", "getawayshootoutnew", "gladihoppers", "googlesnake", "gopherkart", "grindcraft", "hexgl", "hextris", "highwaytraffic", "konnekt", "learntofly", "letssurf", "littlealchemy", "mergeroundracers", "monkeymart", "motoroadrash3d", "motox3m", "ninjavsevilcorp", "omnombounce", "ovo", "ovo2", "packabunchas", "pacman", "paperio", "particleclicker", "pushback", "q1k3", "r3", "racer", "radiusraid", "redball4", "retrobowl", "retrohaunt", "riddleschool2", "ritz", "roadblocks", "rooftopsnipers", "run3", "scrapmetal3", "shuttledeck", "sketchbook04", "sleepingbeauty", "slitherio", "slope", "slope2", "snake", "snowbattle", "soccerrandom", "solitaire", "spacecompany", "spacegarden", "spacehuggers", "spaceinvaders", "stack", "stackball", "stickman-hook", "stickmanboost", "stickmanclimb", "stickmangolf", "stickmanhook", "stickmansurvival", "subwaysurfers", "subwaysurfersny", "subwaysurferssingapore", "tanukisunset", "tetris", "themazeofspacegoblins", "timeshooter", "timeshooter2", "timeshooter3", "tinyfishing", "tombofthemask", "topspeedracing3d", "towermaster", "trimps", "tunnelrush", "vex3", "vex4", "vex5", "vex6", "worldshardestgame2", "zombsroyale"]; 
+
+function loadGames() {
+    const container = document.getElementById('sections-container');
+    const favContainer = document.getElementById('favorites-container');
+    
+    // Load Favorites First
+    favorites.forEach(name => {
+        const btn = document.createElement('button');
+        btn.className = 'game-btn'; 
+        btn.style.borderColor = "#ffd700"; 
+        btn.innerText = "★ " + name.replace(/-/g, ' ').toUpperCase();
+        btn.onclick = () => launchGame(name);
+        favContainer.appendChild(btn);
+    });
+
+    // Load All Games
+    files.forEach(name => {
+        const btn = document.createElement('button');
+        btn.className = 'game-btn'; 
+        btn.innerText = name.replace(/-/g, ' ').toUpperCase();
+        btn.onclick = () => launchGame(name);
+        container.appendChild(btn);
+    });
+}
+
+async function launchGame(name) {
+    // Exact CDN path to the index.html
+    const url = `https://fastly.jsdelivr.net/gh/${USER}/${REPO}@main/${FOLDER}/${name}/index.html`;
+    
+    try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error("Could not reach GitHub");
+        let html = await response.text();
+        
+        // This line tells the game: "Find all your other files on GitHub!"
+        const baseHref = `https://cdn.jsdelivr.net/gh/${USER}/${REPO}@main/${FOLDER}/${name}/`;
+        const baseTag = `<base href="${baseHref}">`;
+        
+        // Inject the base tag right after <head>
+        if (html.includes('<head>')) {
+            html = html.replace('<head>', `<head>${baseTag}`);
+        } else {
+            html = baseTag + html;
+        }
+
+        const blob = new Blob([html], { type: 'text/html' });
+        const blobUrl = URL.createObjectURL(blob);
+
+        document.getElementById('game-frame').src = blobUrl;
+        document.getElementById('game-overlay').style.display = 'block';
+    } catch (err) {
+        console.error("Game load failed:", err);
+        alert("Game failed to load. Check your internet or if GitHub is down.");
+    }
+}
+
+function closeGame() {
+    document.getElementById('game-overlay').style.display = 'none';
+    document.getElementById('game-frame').src = "";
+}
+
+// Search Logic
+document.getElementById('game-search').addEventListener('input', (e) => {
+    const val = e.target.value.toLowerCase();
+    document.querySelectorAll('.game-btn').forEach(btn => {
+        btn.style.display = btn.innerText.toLowerCase().includes(val) ? "block" : "none";
+    });
+});
+
+loadGames();
+</script>
+
+</body>
+</html>
+
