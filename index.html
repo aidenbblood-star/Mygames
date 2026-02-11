@@ -48,11 +48,11 @@ let favorites = ["1v1lol", "retrobowl", "slope", "drivemad", "bitlife"];
 async function loadGames() {
     const container = document.getElementById('sections-container');
     const favContainer = document.getElementById('favorites-container');
+    // Clear containers before loading
+    container.innerHTML = "";
+    favContainer.innerHTML = "";
 
-    // 1. Load original 'games' (which are in folders)
     await fetchFromGitHub(GAMES_FOLDER, true);
-
-    // 2. Load the renamed 'ugs' folder (which are individual html files)
     await fetchFromGitHub(UGS_FOLDER, false);
 }
 
@@ -73,7 +73,8 @@ async function fetchFromGitHub(folderPath, isFolderMode) {
                 gameName = item.name;
                 launchUrl = `https://fastly.jsdelivr.net/gh/${USER}/${REPO}@main/${folderPath}/${gameName}/index.html`;
             } else if (!isFolderMode && item.name.endsWith(".html")) {
-                gameName = item.name.replace(".html", "");
+                // FIXED: Correctly removes .html and the 'cl' prefix
+                gameName = item.name.replace(".html", "").replace(/^cl/i, "");
                 launchUrl = `https://fastly.jsdelivr.net/gh/${USER}/${REPO}@main/${folderPath}/${item.name}`;
             }
 
@@ -81,7 +82,6 @@ async function fetchFromGitHub(folderPath, isFolderMode) {
                 const btn = document.createElement('button');
                 btn.className = 'game-btn';
                 
-                // FIXED: Adds to Favorites if the name matches your list
                 if (favorites.includes(gameName.toLowerCase())) {
                     const favBtn = btn.cloneNode(true);
                     favBtn.style.borderColor = "#ffd700";
@@ -95,7 +95,7 @@ async function fetchFromGitHub(folderPath, isFolderMode) {
                 container.appendChild(btn);
             }
         });
-    } catch (err) { console.error("Load failed for " + folderPath, err); }
+    } catch (err) { console.error("Load failed", err); }
 }
 
 function launchDirect(url, folder, name) {
@@ -116,7 +116,6 @@ function closeGame() {
     document.getElementById('game-frame').src = "";
 }
 
-// FIXED: Added the Search Logic back in
 document.getElementById('game-search').addEventListener('input', (e) => {
     const val = e.target.value.toLowerCase();
     document.querySelectorAll('.game-btn').forEach(btn => {
