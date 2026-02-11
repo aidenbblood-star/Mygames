@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Ultimate Game Stash</title>
+    <title>Ultimate Game Hub</title>
     <style>
         /* THEME: Pure Black & Neon */
         body {
@@ -18,6 +18,16 @@
             width: 100%;
             max-width: 900px;
             padding: 40px 20px;
+        }
+
+        /* NEW: ULTIMATE GAME HUB HEADER (Muted Gray like screenshot) */
+        h1 {
+            color: #444; 
+            text-align: center;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 30px;
         }
 
         /* NEON SEARCH BAR */
@@ -39,12 +49,46 @@
             box-shadow: 0 0 15px rgba(0, 242, 255, 0.6); 
         }
 
-        /* TOP PICKS (Neon Yellow Glow) */
-        .top-picks-container { margin-bottom: 60px; }
+        /* SECTION HEADERS (The '1' in your image) */
+        .letter-header {
+            color: #fff;
+            font-size: 14px;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        /* DARK BUTTONS (Matches 12MINIBATTLES style) */
+        .buttons-container { display: flex; flex-direction: column; gap: 8px; }
+        .game-btn {
+            background: linear-gradient(180deg, #0a0a0a 0%, #050505 100%);
+            border: 1px solid #1a1a1a;
+            color: #fff;
+            padding: 16px;
+            border-radius: 8px;
+            width: 100%;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: 0.2s ease-in-out;
+            text-align: center;
+            outline: none;
+        }
+
+        /* THE CYAN GLOW (Selected/Hover state) */
+        .game-btn:hover, .game-btn:focus { 
+            border-color: #00f2ff;
+            color: #00f2ff;
+            box-shadow: inset 0 0 10px rgba(0, 242, 255, 0.2), 0 0 15px rgba(0, 242, 255, 0.4);
+            transform: scale(1.005);
+        }
+
+        /* TOP PICKS (Yellow/Green neon) */
         .fav-btn {
             background: #000;
-            border: 1px solid #ccff00; /* Neon Yellow-Green */
-            color: #fff;
+            border: 1px solid #ccff00;
+            color: #ccff00;
             padding: 18px;
             margin-bottom: 15px;
             border-radius: 12px;
@@ -54,52 +98,23 @@
             cursor: pointer;
             transition: 0.3s;
         }
-        .fav-btn:hover { box-shadow: 0 0 15px #ccff00; transform: scale(1.01); }
-
-        /* LETTER HEADERS (Neon Blue) */
-        .letter-header {
-            color: #00f2ff;
-            font-size: 40px;
-            font-weight: bold;
-            text-align: center;
-            margin: 60px 0 20px;
-            text-shadow: 0 0 10px rgba(0, 242, 255, 0.5);
-        }
-
-        /* ALL GAMES BUTTONS (Neon Blue Glow) */
-        .buttons-container { display: flex; flex-direction: column; gap: 12px; }
-        .game-btn {
-            background: #111;
-            border: 1px solid #222;
-            color: #fff;
-            padding: 20px;
-            border-radius: 12px;
-            width: 100%;
-            font-weight: 500;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: 0.3s;
-            text-align: center;
-        }
-        .game-btn:hover { 
-            border-color: #00f2ff; 
-            box-shadow: 0 0 20px rgba(0, 242, 255, 0.4); 
-            background: #000;
-        }
+        .fav-btn:hover { box-shadow: 0 0 20px rgba(204, 255, 0, 0.3); }
     </style>
 </head>
 <body>
 
     <div class="main-content">
+        <h1>ULTIMATE GAME HUB</h1> <!-- Added this header -->
+
         <div class="search-container">
             <input type="text" id="game-search" class="game-search" placeholder="Search through all games...">
         </div>
 
-        <div id="favorites-container" class="top-picks-container"></div>
+        <div id="favorites-container"></div>
         <div id="sections-container"></div>
     </div>
 
-    <!-- Your standard loading script -->
+    <!-- Loading the external game list -->
     <script src="https://cdn.jsdelivr.net/gh/bubbls/ugs-singlefile@main/games.js"></script>
 
     <script>
@@ -114,10 +129,9 @@
             const container = document.getElementById('sections-container');
             const favContainer = document.getElementById('favorites-container');
             
-            // 1. Sort and Filter
             const sortedGames = games.sort((a, b) => a.name.localeCompare(b.name));
             
-            // 2. Build Top Picks
+            // Build Top Picks
             favList.forEach(name => {
                 const game = sortedGames.find(g => g.name.toUpperCase().includes(name));
                 if (game) {
@@ -129,11 +143,11 @@
                 }
             });
 
-            // 3. Build Alphabetical Sections
+            // Build Alphabetical Sections
             const groups = {};
             sortedGames.forEach(game => {
                 const firstChar = game.name.charAt(0).toUpperCase();
-                const letter = isNaN(firstChar) ? firstChar : "1"; // Match your image '1' header
+                const letter = isNaN(firstChar) ? firstChar : "1"; 
                 if (!groups[letter]) groups[letter] = [];
                 groups[letter].push(game);
             });
@@ -170,4 +184,3 @@
     </script>
 </body>
 </html>
-
