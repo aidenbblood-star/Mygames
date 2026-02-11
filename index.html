@@ -1,145 +1,195 @@
 <!DOCTYPE html>
-<html lang="en-us">
+<html>
 <head>
-    <meta charset="utf-8">
     <title>Ultimate Game Stash</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #050505; color: #ffffff; margin: 0; display: flex; justify-content: center; } 
-        .main-content { flex: 1; padding: 30px; max-width: 1000px; width: 100%; } 
-        h1 { text-align: center; font-size: 3rem; text-transform: uppercase; letter-spacing: -1px; margin-bottom: 30px; color: #00f2ff; } 
-        .game-search { width: 90%; padding: 15px; background: #1a1a1a; border: 1px solid #333; border-radius: 10px; color: #fff; font-size: 1rem; margin-bottom: 40px; } 
-        .game-btn { background: #0f0f0f; border: 1px solid #222; padding: 18px; border-radius: 12px; cursor: pointer; color: #eee; width: 100%; margin-bottom: 12px; transition: 0.3s; font-weight: bold; text-align: center; display: block; } 
-        .game-btn:hover { color: #00f2ff; border-color: #00f2ff; box-shadow: 0 0 20px rgba(0, 242, 255, 0.6); }
-        #game-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 2000; }
-        #game-frame { width: 100%; height: 100%; border: none; }
-        .close-btn { position: absolute; top: 10px; right: 20px; padding: 10px 20px; background: #ff3e3e; color: white; cursor: pointer; border-radius: 5px; z-index: 2001; font-weight: bold; }
+        /* BASE THEME: Blue Gradient */
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #2e3244 0%, #36224b 100%);
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+        }
+
+        /* SIDEBAR NAVIGATION */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 80px;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            padding: 20px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        .sidebar-btn {
+            background: rgb(89, 134, 218);
+            border: none;
+            padding: 12px;
+            font-size: 18px;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: white;
+            text-align: center;
+        }
+
+        .sidebar-btn:hover { background: #79aadb; transform: scale(1.1); }
+
+        /* MAIN CONTENT */
+        .main-content {
+            margin-left: 100px;
+            flex: 1;
+            padding: 40px;
+        }
+
+        h1 { color: white; text-align: center; font-size: 3rem; margin-bottom: 20px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+
+        /* NEON SEARCH BAR */
+        .search-container { text-align: center; margin-bottom: 40px; }
+        .game-search { 
+            width: 70%; 
+            padding: 15px; 
+            background: #1a1a1a; 
+            border: 1px solid #333; 
+            border-radius: 10px; 
+            color: #fff;
+            font-size: 1rem;
+            transition: 0.3s;
+        }
+        .search-container input:focus { 
+            outline: none; 
+            border-color: #00f2ff; 
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.4); 
+        }
+
+        /* LETTER SECTIONS */
+        .letter-header {
+            color: white;
+            font-size: 32px;
+            font-weight: bold;
+            margin: 40px 0 15px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid rgba(255,255,255,0.3);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .buttons-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: center;
+        }
+
+        /* BLUE GAME BUTTONS */
+        .game-btn {
+            background: rgb(89, 134, 218);
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: 500;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            max-width: 600px;
+            color: white;
+            text-align: left;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .game-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+            background: #79aadb;
+        }
     </style>
 </head>
 <body>
-
-    <div id="game-overlay">
-        <div class="close-btn" onclick="closeGame()">CLOSE GAME</div>
-        <iframe id="game-frame" src=""></iframe>
-    </div>
+    <div class="sidebar" id="sidebar"></div>
 
     <div class="main-content">
         <h1>Ultimate Game Stash</h1>
-        <div style="text-align:center;">
-            <input type="text" id="game-search" class="game-search" placeholder="Search through all games..." onkeyup="searchGames()">
+
+        <div class="search-container">
+            <input type="text" id="game-search" class="game-search" placeholder="Search through all games...">
         </div>
-        <div id="favorites-container"></div>
+        
         <div id="sections-container"></div>
     </div>
 
-<script>    
-const USER = "aidenbblood-star";
-const REPO = "Mygames";
-const UGS_FOLDER = "ugs"; 
-const GAMES_FOLDER = "games";
+    <!-- The original loading script you provided -->
+    <script src="https://cdn.jsdelivr.net/gh/bubbls/ugs-singlefile@main/games.js"></script>
 
-let favorites = ["1v1lol", "retrobowl", "slope", "drivemad", "bitlife", "10minutestildawn"];
-
-async function loadGames() {
-    const container = document.getElementById('sections-container');
-    const favContainer = document.getElementById('favorites-container');
-    container.innerHTML = "Scanning for games...";
-    favContainer.innerHTML = "";
-
-    // 1. Fetch data from both folders
-    const gamesData = await fetchFromGitHub(GAMES_FOLDER, true);
-    const ugsData = await fetchFromGitHub(UGS_FOLDER, false);
-
-    // 2. COMBINE AND REMOVE DUPLICATES
-    // We use a Map keyed by the lowercase name to ensure each game is unique
-    const uniqueGamesMap = new Map();
-    [...gamesData, ...ugsData].forEach(game => {
-        const lowerName = game.name.toLowerCase();
-        if (!uniqueGamesMap.has(lowerName)) {
-            uniqueGamesMap.set(lowerName, game);
-        }
-    });
-
-    // 3. Convert Map back to array and Sort A-Z
-    const allGames = Array.from(uniqueGamesMap.values()).sort((a, b) => 
-        a.name.localeCompare(b.name)
-    );
-
-    container.innerHTML = ""; // Clear loading text
-
-    // 4. Create the buttons
-    allGames.forEach(game => {
-        const btn = document.createElement('button');
-        btn.className = 'game-btn';
-        const displayName = game.name.replace(/-/g, ' ').toUpperCase();
-
-        // Add to Favorites if it matches your list
-        if (favorites.includes(game.name.toLowerCase())) {
-            const favBtn = btn.cloneNode(true);
-            favBtn.style.borderColor = "#ffd700";
-            favBtn.innerText = "★ " + displayName;
-            favBtn.onclick = () => launchDirect(game.url, game.folder, game.name);
-            favContainer.appendChild(favBtn);
-        }
-
-        btn.innerText = displayName;
-        btn.onclick = () => launchDirect(game.url, game.folder, game.name);
-        container.appendChild(btn);
-    });
-}
-
-async function fetchFromGitHub(folderPath, isFolderMode) {
-    let collected = [];
-    try {
-        const response = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/${encodeURIComponent(folderPath)}`);
-        if (!response.ok) return [];
-        const items = await response.json();
-
-        items.forEach(item => {
-            if (isFolderMode && item.type === "dir") {
-                collected.push({
-                    name: item.name,
-                    folder: folderPath,
-                    url: `https://fastly.jsdelivr.net/gh/${USER}/${REPO}@main/${folderPath}/${item.name}/index.html`
-                });
-            } else if (!isFolderMode && item.name.endsWith(".html")) {
-                collected.push({
-                    name: item.name.replace(".html", "").replace(/^cl/i, ""),
-                    folder: folderPath,
-                    url: `https://fastly.jsdelivr.net/gh/${USER}/${REPO}@main/${folderPath}/${item.name}`
-                });
+    <script>
+        // Use the list generated by games.js and apply your custom layout/search
+        function buildUI() {
+            if (typeof games === 'undefined') {
+                setTimeout(buildUI, 100);
+                return;
             }
+
+            const container = document.getElementById('sections-container');
+            const sidebar = document.getElementById('sidebar');
+            container.innerHTML = "";
+            sidebar.innerHTML = "";
+
+            // 1. Group games by letter
+            const groups = {};
+            games.forEach(game => {
+                const letter = game.name.charAt(0).toUpperCase();
+                if (!groups[letter]) groups[letter] = [];
+                groups[letter].push(game);
+            });
+
+            // 2. Build A-Z Sections
+            Object.keys(groups).sort().forEach(letter => {
+                // Add Sidebar Button
+                const sideBtn = document.createElement('button');
+                sideBtn.className = 'sidebar-btn';
+                sideBtn.innerText = letter;
+                sideBtn.onclick = () => document.getElementById(`section-${letter}`).scrollIntoView({behavior: "smooth"});
+                sidebar.appendChild(sideBtn);
+
+                // Add Alphabet Section
+                const section = document.createElement('div');
+                section.id = `section-${letter}`;
+                section.innerHTML = `<div class="letter-header">${letter}</div><div class="buttons-container" id="btns-${letter}"></div>`;
+                container.appendChild(section);
+
+                // Add Game Buttons
+                groups[letter].forEach(game => {
+                    const btn = document.createElement('button');
+                    btn.className = 'game-btn';
+                    btn.innerText = game.name;
+                    btn.onclick = () => window.location.href = game.url; // Keeps original loading logic
+                    document.getElementById(`btns-${letter}`).appendChild(btn);
+                });
+            });
+        }
+
+        // Search Filter Logic
+        document.getElementById('game-search').addEventListener('input', (e) => {
+            const val = e.target.value.toLowerCase();
+            document.querySelectorAll('.game-btn').forEach(btn => {
+                btn.style.display = btn.innerText.toLowerCase().includes(val) ? "block" : "none";
+            });
+            // Hide empty letter headers during search
+            document.querySelectorAll('[id^="section-"]').forEach(section => {
+                const hasVisible = Array.from(section.querySelectorAll('.game-btn')).some(b => b.style.display !== "none");
+                section.style.display = hasVisible ? "block" : "none";
+            });
         });
-    } catch (err) { console.error("Fetch failed", err); }
-    return collected;
-}
 
-function launchDirect(url, folder, name) {
-    const frame = document.getElementById('game-frame');
-    const baseHref = `https://cdn.jsdelivr.net/gh/${USER}/${REPO}@main/${folder}/${name}/`;
-    
-    fetch(url).then(res => res.text()).then(html => {
-        const baseTag = `<base href="${baseHref}">`;
-        const fullHtml = html.includes('<head>') ? html.replace('<head>', `<head>${baseTag}`) : baseTag + html;
-        const blob = new Blob([fullHtml], { type: 'text/html' });
-        frame.src = URL.createObjectURL(blob);
-        document.getElementById('game-overlay').style.display = 'block';
-    }).catch(err => alert("Game failed to load."));
-}
-
-function closeGame() {
-    document.getElementById('game-overlay').style.display = 'none';
-    document.getElementById('game-frame').src = "";
-}
-
-document.getElementById('game-search').addEventListener('input', (e) => {
-    const val = e.target.value.toLowerCase();
-    document.querySelectorAll('#sections-container .game-btn').forEach(btn => {
-        btn.style.display = btn.innerText.toLowerCase().includes(val) ? "block" : "none";
-    });
-});
-
-loadGames();
-</script>
-
+        window.onload = buildUI;
+    </script>
 </body>
 </html>
