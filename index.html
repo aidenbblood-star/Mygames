@@ -28,19 +28,46 @@
     </div>
 
     <!-- EXTERNAL SOURCE: Loading the game list -->
-    <script src="https://cdn.jsdelivr.net/gh/aidenbblood-star/ugs-singlefile@main/games.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/aidenbblood-star/ugs-singlefile@28a4b25e3429aa448c63047f5e2f9c9804ad67c2/games.js"></script>
 
-    <script>
-        // Search logic specifically for input buttons
-        document.getElementById('game-search').addEventListener('input', (e) => {
-            const val = e.target.value.toLowerCase();
-            document.querySelectorAll('.game-btn').forEach(btn => {
-                // Since games.js makes "input type=button", we check .value
-                const name = btn.value.toLowerCase(); 
-                btn.style.display = name.includes(val) ? "block" : "none";
+   <script>
+    // 1. Wait for everything to load
+    window.addEventListener('load', function() {
+        const searchInput = document.getElementById('game-search');
+        
+        // 2. Optimized search for dynamic buttons
+        searchInput.addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            const allButtons = document.querySelectorAll('.game-btn');
+            
+            allButtons.forEach(btn => {
+                // We use .value because games.js creates <input type="button">
+                const gameName = btn.value.toLowerCase();
+                
+                if (gameName.includes(term)) {
+                    btn.style.display = "block";
+                    // Ensure the parent letter section is also visible
+                    btn.parentElement.parentElement.style.display = "block";
+                } else {
+                    btn.style.display = "none";
+                }
+            });
+
+            // 3. Hide letter headers if all games under them are hidden
+            document.querySelectorAll('[id^="section-"]').forEach(section => {
+                const visibleButtons = section.querySelectorAll('.game-btn[style*="display: block"]');
+                const isSearching = term.length > 0;
+                
+                if (isSearching && visibleButtons.length === 0) {
+                    section.style.display = "none";
+                } else {
+                    section.style.display = "block";
+                }
             });
         });
-    </script>
+    });
+</script>
+
 </body>
 </html>
 
