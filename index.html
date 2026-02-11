@@ -12,7 +12,7 @@
         .game-search:focus { outline: none; border-color: #00f2ff; box-shadow: 0 0 15px rgba(0, 242, 255, 0.6); }
         .letter-header { color: #fff; font-size: 14px; font-weight: bold; text-align: center; margin: 20px 0; }
         .buttons-container { display: flex; flex-direction: column; gap: 8px; }
-        .game-btn { background: linear-gradient(180deg, #0a0a0a 0%, #050505 100%); border: 1px solid #1a1a1a; color: #fff; padding: 16px; border-radius: 8px; width: 100%; font-size: 13px; font-weight: 600; text-transform: uppercase; cursor: pointer; transition: 0.2s ease-in-out; text-align: center; }
+        .game-btn { background: linear-gradient(180deg, #0a0a0a 0%, #050505 100%); border: 1px solid #1a1a1a; color: #fff; padding: 16px; border-radius: 8px; width: 100%; font-size: 13px; font-weight: 600; text-transform: uppercase; cursor: pointer; transition: 0.2s ease-in-out; text-align: center; margin-bottom: 5px; }
         .game-btn:hover, .game-btn:focus { border-color: #00f2ff; color: #00f2ff; box-shadow: inset 0 0 10px rgba(0, 242, 255, 0.2), 0 0 15px rgba(0, 242, 255, 0.4); transform: scale(1.005); }
     </style>
 </head>
@@ -23,45 +23,27 @@
             <input type="text" id="game-search" class="game-search" placeholder="Search through all games...">
         </div>
 
-        <!-- DO NOT CHANGE THESE IDs - THEY FIX THE ERROR -->
         <div id="favorites-container"></div>
         <div id="sections-container"></div>
     </div>
 
-      <!-- EXTERNAL SOURCE: Loading the game list -->
+    <!-- EXTERNAL SOURCE: Loading the game list -->
     <script src="https://cdn.jsdelivr.net/gh/aidenbblood-star/ugs-singlefile@main/games.js"></script>
 
-
-<script>
-    function initApp() {
-        // We check for 'manualList' because that is what's in your games.js
-        if (typeof manualList !== 'undefined') {
-            buildStash(); // This function is defined inside your games.js
-            setupSearch();
-        } else {
-            setTimeout(initApp, 100);
-        }
-    }
-
-    function setupSearch() {
-        const searchInput = document.getElementById('game-search');
-        if (!searchInput) return;
-
-        searchInput.addEventListener('input', (e) => {
+    <script>
+        // Search logic specifically for input buttons
+        document.getElementById('game-search').addEventListener('input', (e) => {
             const val = e.target.value.toLowerCase();
-            // Your games.js uses .game-btn class, so we target those
             document.querySelectorAll('.game-btn').forEach(btn => {
+                // Since games.js makes "input type=button", we check .value
                 const name = btn.value.toLowerCase(); 
                 btn.style.display = name.includes(val) ? "block" : "none";
             });
         });
-    }
-
-    document.addEventListener('DOMContentLoaded', initApp);
-</script>
-
+    </script>
 </body>
 </html>
+
 
 
  
