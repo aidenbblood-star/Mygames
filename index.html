@@ -39,8 +39,9 @@
 <script>    
 const USER = "aidenbblood-star";
 const REPO = "Mygames";
-// Make sure this name matches your long folder name EXACTLY
-const UGS_FOLDER = "aidenbblood-star ugs singlefile main UGS-Files";
+
+// FIXED: Set to lowercase "ugs" to match your GitHub folder exactly
+const UGS_FOLDER = "ugs"; 
 const GAMES_FOLDER = "games";
 
 let favorites = ["1v1lol", "retrobowl", "slope", "drivemad", "bitlife"];
@@ -49,10 +50,10 @@ async function loadGames() {
     const container = document.getElementById('sections-container');
     const favContainer = document.getElementById('favorites-container');
 
-    // 1. Load your original 'games' (which are in folders)
+    // 1. Load original 'games' (which are in folders)
     await fetchFromGitHub(GAMES_FOLDER, true);
 
-    // 2. Load the 'UGS-Files' (which are individual html files)
+    // 2. Load the renamed 'ugs' folder (which are individual html files)
     await fetchFromGitHub(UGS_FOLDER, false);
 }
 
@@ -68,11 +69,9 @@ async function fetchFromGitHub(folderPath, isFolderMode) {
             let launchUrl = "";
 
             if (isFolderMode && item.type === "dir") {
-                // For 'games' folder: look for subfolders
                 gameName = item.name;
                 launchUrl = `https://fastly.jsdelivr.net/gh/${USER}/${REPO}@main/${folderPath}/${gameName}/index.html`;
             } else if (!isFolderMode && item.name.endsWith(".html")) {
-                // For 'UGS-Files': look for .html files
                 gameName = item.name.replace(".html", "");
                 launchUrl = `https://fastly.jsdelivr.net/gh/${USER}/${REPO}@main/${folderPath}/${item.name}`;
             }
@@ -90,9 +89,9 @@ async function fetchFromGitHub(folderPath, isFolderMode) {
 
 function launchDirect(url, folder, name) {
     const frame = document.getElementById('game-frame');
-   const baseHref = 'https://cdn.jsdelivr.net/gh/${USER}/${REPO}@main/${folder}/${name}/';
+    // FIXED: Using backticks (``) so ${USER} and ${REPO} work correctly
+    const baseHref = `https://cdn.jsdelivr.net/gh/${USER}/${REPO}@main/${folder}/${name}/`;
     
-    // We fetch the HTML to inject the <base> tag so images/scripts still load correctly
     fetch(url).then(res => res.text()).then(html => {
         const baseTag = `<base href="${baseHref}">`;
         const fullHtml = html.includes('<head>') ? html.replace('<head>', `<head>${baseTag}`) : baseTag + html;
@@ -108,8 +107,8 @@ function closeGame() {
 }
 
 loadGames();
-
 </script>
+
 </body>
 </html>
 
