@@ -3,58 +3,46 @@
 <head>
     <title>Ultimate Game Hub</title>
     <style>
-        /* THEME: Pure Black & Neon Cyan Glow */
+        /* CSS from your previous code here... */
         body { background-color: #000; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; justify-content: center; overflow-x: hidden; }
         .main-content { width: 100%; max-width: 900px; padding: 40px 20px; }
-        h1 { color: #444; text-align: center; font-size: 1.5rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 30px; }
-        .search-container { text-align: center; margin-bottom: 50px; }
-        .game-search { width: 100%; padding: 15px; background: #000; border: 1px solid #333; border-radius: 10px; color: #fff; text-align: center; font-size: 1.1rem; }
-        .game-search:focus { outline: none; border-color: #00f2ff; box-shadow: 0 0 15px rgba(0, 242, 255, 0.6); }
+        .game-btn { background: #0a0a0a; border: 1px solid #1a1a1a; color: #fff; padding: 16px; border-radius: 8px; width: 100%; cursor: pointer; text-align: center; margin-bottom: 5px; }
         .letter-header { color: #fff; font-size: 14px; font-weight: bold; text-align: center; margin: 20px 0; }
-        .buttons-container { display: flex; flex-direction: column; gap: 8px; }
-        .game-btn { background: linear-gradient(180deg, #0a0a0a 0%, #050505 100%); border: 1px solid #1a1a1a; color: #fff; padding: 16px; border-radius: 8px; width: 100%; font-size: 13px; font-weight: 600; text-transform: uppercase; cursor: pointer; transition: 0.2s ease-in-out; text-align: center; margin-bottom: 5px; }
-        .game-btn:hover, .game-btn:focus { border-color: #00f2ff; color: #00f2ff; box-shadow: inset 0 0 10px rgba(0, 242, 255, 0.2), 0 0 15px rgba(0, 242, 255, 0.4); transform: scale(1.005); }
     </style>
 </head>
 <body>
     <div class="main-content">
         <h1>ULTIMATE GAME HUB</h1>
         <div class="search-container">
-            <input type="text" id="game-search" class="game-search" placeholder="Search through all games...">
+            <input type="text" id="game-search" placeholder="Search through all games..." style="width: 100%; padding: 15px; background: #000; border: 1px solid #333; color: #fff; text-align: center;">
         </div>
-
-        <div id="favorites-container"></div>
         <div id="sections-container"></div>
     </div>
 
-    <!-- EXTERNAL SOURCE: Loading the game list -->
-    <script src="https://cdn.jsdelivr.net/gh/aidenbblood-star/ugs-singlefile@1c44faca2252a4e398d3ae7352b57a13ecf62974/games.js"></script>
-
-   <script>
-    document.getElementById('game-search').addEventListener('input', (e) => {
-        const val = e.target.value.toLowerCase();
+    <script>
+        // --- THE APPENDCHILD METHOD ---
+        const script = document.createElement('script');
+        // Use the SPECIFIC HASH from your GitHub commit to bypass the 50MB error
+        script.src = "https://cdn.jsdelivr.net/gh/aidenbblood-star/ugs-singlefile@4c4db16f27b6e7c81c63b3bb6a3dbe99addbebe7/games.js";
+        script.async = true; 
         
-        // 1. Filter all buttons
-        document.querySelectorAll('.game-btn').forEach(btn => {
-            const name = btn.value.toLowerCase(); 
-            btn.style.display = name.includes(val) ? "block" : "none";
+        script.onload = function() {
+            console.log("Games list loaded!");
+            if (typeof buildStash === 'function') buildStash();
+        };
+        document.head.appendChild(script);
+
+        // Search logic
+        document.getElementById('game-search').addEventListener('input', (e) => {
+            const val = e.target.value.toLowerCase().trim();
+            document.querySelectorAll('.game-btn').forEach(btn => {
+                btn.style.display = btn.value.toLowerCase().includes(val) ? "block" : "none";
+            });
+            document.querySelectorAll('[id^="section-"]').forEach(section => {
+                const hasVisible = Array.from(section.querySelectorAll('.game-btn')).some(b => b.style.display !== 'none');
+                section.style.display = (val === "" || hasVisible) ? "block" : "none";
+            });
         });
-
-        // 2. Hide headers that have no visible games
-        document.querySelectorAll('[id^="section-"]').forEach(section => {
-            const hasVisible = Array.from(section.querySelectorAll('.game-btn'))
-                                    .some(b => b.style.display !== 'none');
-            section.style.display = hasVisible ? "block" : "none";
-        });
-    });
-</script>
-
-
+    </script>
 </body>
 </html>
-
-
-
- 
-
-   
