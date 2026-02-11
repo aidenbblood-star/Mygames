@@ -20,7 +20,7 @@
             padding: 40px 20px;
         }
 
-        /* NEW: ULTIMATE GAME HUB HEADER (Muted Gray like screenshot) */
+        /* ULTIMATE GAME HUB HEADER (Muted Gray) */
         h1 {
             color: #444; 
             text-align: center;
@@ -49,7 +49,7 @@
             box-shadow: 0 0 15px rgba(0, 242, 255, 0.6); 
         }
 
-        /* SECTION HEADERS (The '1' in your image) */
+        /* SECTION HEADERS (The '0' and '1' headers) */
         .letter-header {
             color: #fff;
             font-size: 14px;
@@ -58,7 +58,7 @@
             margin: 20px 0;
         }
 
-        /* DARK BUTTONS (Matches 12MINIBATTLES style) */
+        /* DARK NEON BUTTONS */
         .buttons-container { display: flex; flex-direction: column; gap: 8px; }
         .game-btn {
             background: linear-gradient(180deg, #0a0a0a 0%, #050505 100%);
@@ -76,51 +76,34 @@
             outline: none;
         }
 
-        /* THE CYAN GLOW (Selected/Hover state) */
+        /* THE CYAN GLOW ON HOVER */
         .game-btn:hover, .game-btn:focus { 
             border-color: #00f2ff;
             color: #00f2ff;
             box-shadow: inset 0 0 10px rgba(0, 242, 255, 0.2), 0 0 15px rgba(0, 242, 255, 0.4);
             transform: scale(1.005);
         }
-
-        /* TOP PICKS (Yellow/Green neon) */
-        .fav-btn {
-            background: #000;
-            border: 1px solid #ccff00;
-            color: #ccff00;
-            padding: 18px;
-            margin-bottom: 15px;
-            border-radius: 12px;
-            width: 100%;
-            font-weight: bold;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        .fav-btn:hover { box-shadow: 0 0 20px rgba(204, 255, 0, 0.3); }
     </style>
 </head>
 <body>
 
     <div class="main-content">
-        <h1>ULTIMATE GAME HUB</h1> <!-- Added this header -->
+        <h1>ULTIMATE GAME HUB</h1>
 
         <div class="search-container">
             <input type="text" id="game-search" class="game-search" placeholder="Search through all games...">
         </div>
 
+        <!-- THESE TWO IDS ARE CRITICAL TO FIX THE 'APPENDCHILD' ERROR -->
         <div id="favorites-container"></div>
         <div id="sections-container"></div>
     </div>
 
-    <!-- Loading the external game list -->
-    
+  
 
     <script>
-        const favList = ["DRIVEMAD", "RETROBOWL", "SLOPE"];
-
         function buildUI() {
+            // Check if the game list is loaded from the external script
             if (typeof games === 'undefined') {
                 setTimeout(buildUI, 100);
                 return;
@@ -129,21 +112,11 @@
             const container = document.getElementById('sections-container');
             const favContainer = document.getElementById('favorites-container');
             
+            // Safety check: if containers are missing, don't run
+            if (!container || !favContainer) return;
+
             const sortedGames = games.sort((a, b) => a.name.localeCompare(b.name));
             
-            // Build Top Picks
-            favList.forEach(name => {
-                const game = sortedGames.find(g => g.name.toUpperCase().includes(name));
-                if (game) {
-                    const btn = document.createElement('button');
-                    btn.className = 'fav-btn';
-                    btn.innerText = `★ ${game.name}`;
-                    btn.onclick = () => window.location.href = game.url;
-                    favContainer.appendChild(btn);
-                }
-            });
-
-            // Build Alphabetical Sections
             const groups = {};
             sortedGames.forEach(game => {
                 const firstChar = game.name.charAt(0).toUpperCase();
@@ -168,20 +141,17 @@
             });
         }
 
-        // Search logic
         document.getElementById('game-search').addEventListener('input', (e) => {
             const val = e.target.value.toLowerCase();
-            document.querySelectorAll('.game-btn, .fav-btn').forEach(btn => {
+            document.querySelectorAll('.game-btn').forEach(btn => {
                 btn.style.display = btn.innerText.toLowerCase().includes(val) ? "block" : "none";
-            });
-            document.querySelectorAll('[id^="section-"]').forEach(sec => {
-                const hasVisible = Array.from(sec.querySelectorAll('.game-btn')).some(b => b.style.display !== "none");
-                sec.style.display = hasVisible ? "block" : "none";
             });
         });
 
-        window.onload = buildUI;
+        // Use 'load' event to ensure everything is ready
+        window.addEventListener('load', buildUI);
     </script>
+    <!-- Script at the bottom so elements load first -->
     <script src="https://cdn.jsdelivr.net/gh/bubbls/ugs-singlefile@main/games.js"></script>
 </body>
 </html>
