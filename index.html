@@ -35,72 +35,65 @@
 <script>    
 const USER = "aidenbblood-star";
 const REPO = "Mygames";
-const BRANCH = "main"; 
+const BRANCH = "main"; // double check if this is 'main' or 'master'
 const favorites = ["1v1lol", "retrobowl", "slope", "drivemad", "bitlife", "10minutestildawn"];
-
-// NEW: This uses the jsDelivr Data API to scan your repo structure
-async function fetchGameFolders() {
-    try {
-        // Fetch the entire file tree for the repository
-        const url = `https://data.jsdelivr.net/gh/${USER}/${REPO}@${BRANCH}/tree`;
-        const response = await fetch(url);
-        const data = await response.json();
-        
-        // This scans the tree for the 'games' and 'ugs' folders
-        const gamesFolder = data.files.find(f => f.name === "games");
-        const ugsFolder = data.files.find(f => f.name === "ugs");
-
-        // Extract subfolders from both targets
-        const gameList = [];
-        if (gamesFolder && gamesFolder.files) {
-            gamesFolder.files.forEach(f => { if(f.type === "directory") gameList.push({ name: f.name, path: `games/${f.name}` }); });
-        }
-        if (ugsFolder && ugsFolder.files) {
-            ugsFolder.files.forEach(f => { if(f.type === "directory") gameList.push({ name: f.name, path: `ugs/${f.name}` }); });
-        }
-
-        return gameList;
-    } catch (e) {
-        console.error("jsDelivr API Error:", e);
-        return [];
-    }
-}
-
-function launchGame(folderPath) {
-    const frame = document.getElementById('game-frame');
-    document.getElementById('game-overlay').style.display = 'block';
-    // Deep links to the specific game index on the jsDelivr CDN
-    frame.src = `https://cdn.jsdelivr.net/gh/${USER}/${REPO}@${BRANCH}/${folderPath}/index.html`;
-}
 
 async function loadGames() {
     const container = document.getElementById('sections-container');
     const favContainer = document.getElementById('favorites-container');
+    container.innerHTML = "Scanning for games...";
+
+    // This scans your repo recursively to find every folder
+    const scanUrl = `https://data.jsdelivr.net/gh/${USER}/${REPO}@${BRANCH}/tree`;
     
-    // Get the dynamic list from jsDelivr
-    const allGames = await fetchGameFolders();
+    try {
+        const response = await fetch(scanUrl);
+        const data = await response.json();
+        
+        // Find every top-level folder that isn't a single file
+        const allItems = data.files || [];
+        const gameFolders = [];
 
-    container.innerHTML = "";
-    allGames.forEach(game => {
-        const btn = document.createElement('div');
-        btn.className = 'game-btn';
-        btn.innerText = game.name.toUpperCase().replace(/-/g, ' ');
-        btn.onclick = () => launchGame(game.path);
+        allItems.forEach(item => {
+            if (item.type === "directory") {
+                // If it's the 'games' or 'ugs' folder, look inside them
+                if (item.name === "games" || item.name === "ugs") {
+                    item.files.forEach(sub => {
+                        if (sub.type === "directory") {
+                            gameFolders.push({ name: sub.name, path: `${item.name}/${sub.name}` });
+                        }
+                    });
+                } else {
+                    // Otherwise, just add it as a direct game folder
+                    gameFolders.push({ name: item.name, path: item.name });
+                }
+            }
+        });
 
-        // Add to Favorites if name matches our list
-        if (favorites.includes(game.name.toLowerCase())) {
-            const favBtn = btn.cloneNode(true);
-            favBtn.onclick = () => launchGame(game.path);
-            favContainer.appendChild(favBtn);
-        }
-        container.appendChild(btn);
-    });
+        container.innerHTML = "";
+        gameFolders.forEach(game => {
+            const btn = document.createElement('div');
+            btn.className = 'game-btn';
+            btn.innerText = game.name.toUpperCase().replace(/-/g, ' ');
+            btn.onclick = () => launchGame(game.path);
+
+            if (favorites.includes(game.name.toLowerCase())) {
+                const favBtn = btn.cloneNode(true);
+                favBtn.onclick = () => launchGame(game.path);
+                favContainer.appendChild(favBtn);
+            }
+            container.appendChild(btn);
+        });
+
+    } catch (e) {
+        container.innerHTML = "Error: Check your Repo/Username or Branch name.";
+    }
 }
 
-function closeGame() {
-    document.getElementById('game-overlay').style.display = 'none';
-    document.getElementById('game-frame').src = "";
-    document.body.style.overflow = 'auto';
+function launchGame(path) {
+    const frame = document.getElementById('game-frame');
+    document.getElementById('game-overlay').style.display = 'block';
+    frame.src = `https://cdn.jsdelivr.net/gh/${USER}/${REPO}@${BRANCH}/${path}/index.html`;
 }
 
 loadGames();
