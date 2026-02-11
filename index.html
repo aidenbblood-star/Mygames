@@ -3,6 +3,7 @@
 <head>
     <title>Ultimate Game Hub</title>
     <style>
+        /* THEME: Pure Black & Neon Cyan */
         body { background-color: #000; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; justify-content: center; }
         .main-content { width: 100%; max-width: 900px; padding: 40px 20px; }
         h1 { color: #444; text-align: center; font-size: 1.5rem; text-transform: uppercase; margin-bottom: 30px; }
@@ -22,18 +23,62 @@
             <input type="text" id="game-search" class="game-search" placeholder="Search through all games...">
         </div>
         
-        <!-- REQUIRED IDs FOR SCRIPT TO WORK -->
         <div id="favorites-container"></div>
         <div id="sections-container"></div>
     </div>
 
-    <!-- Move script here to stop 'appendChild' errors -->
+    <!-- EXTERNAL SOURCE: Loading the game list -->
     <script src="https://cdn.jsdelivr.net/gh/bubbls/ugs-singlefile@main/games.js"></script>
 
     <script>
-        window.addEventListener('load', () => {
-            if (typeof buildUI === 'function') buildUI();
+        function buildUI() {
+            // Wait for the 'games' array to be available from the external script
+            if (typeof games === 'undefined') {
+                setTimeout(buildUI, 100);
+                return;
+            }
+
+            const container = document.getElementById('sections-container');
+            const favContainer = document.getElementById('favorites-container');
+            if (!container || !favContainer) return;
+
+            // Group and Sort
+            const sortedGames = games.sort((a, b) => a.name.localeCompare(b.name));
+            const groups = {};
+            sortedGames.forEach(game => {
+                const firstChar = game.name.charAt(0).toUpperCase();
+                const letter = isNaN(firstChar) ? firstChar : "0-9"; 
+                if (!groups[letter]) groups[letter] = [];
+                groups[letter].push(game);
+            });
+
+            // Build Sections
+            Object.keys(groups).sort().forEach(letter => {
+                const section = document.createElement('div');
+                section.id = `section-${letter}`;
+                section.innerHTML = `<div class="letter-header">${letter}</div><div class="buttons-container" id="btns-${letter}"></div>`;
+                container.appendChild(section);
+
+                groups[letter].forEach(game => {
+                    const btn = document.createElement('button');
+                    btn.className = 'game-btn';
+                    btn.innerText = game.name;
+                    btn.onclick = () => window.location.href = game.url;
+                    document.getElementById(`btns-${letter}`).appendChild(btn);
+                });
+            });
+        }
+
+        // Search Filter Logic
+        document.getElementById('game-search').addEventListener('input', (e) => {
+            const val = e.target.value.toLowerCase();
+            document.querySelectorAll('.game-btn').forEach(btn => {
+                btn.style.display = btn.innerText.toLowerCase().includes(val) ? "block" : "none";
+            });
         });
+
+        // Ensure UI builds after page and external script load
+        window.onload = buildUI;
     </script>
 </body>
 </html>
