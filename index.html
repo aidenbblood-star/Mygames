@@ -12,7 +12,7 @@
         .search-container { text-align: center; margin-bottom: 40px; } 
         .game-search { width: 80%; padding: 15px; background: #1a1a1a; border: 1px solid #333; border-radius: 10px; color: #fff; } 
         .game-search:focus { outline: none; border-color: #00f2ff; box-shadow: 0 0 15px rgba(0, 242, 255, 0.4); } 
-        .game-btn { background: #0f0f0f; border: 1px solid #222; padding: 18px; border-radius: 12px; cursor: pointer; color: #eee; width: 100%; margin-bottom: 12px; transition: 0.3s; font-weight: bold; text-align: center; display: block; text-decoration: none; } 
+        .game-btn { background: #0f0f0f; border: 1px solid #222; padding: 18px; border-radius: 12px; cursor: pointer; color: #eee; width: 100%; margin-bottom: 12px; transition: 0.3s; font-weight: bold; text-align: center; display: block; text-decoration: none; border: 1px solid #222; } 
         .game-btn:hover { color: #00f2ff; border-color: #00f2ff; box-shadow: 0 0 20px rgba(0, 242, 255, 0.6); }
         #game-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 100; }
         #game-frame { width: 100%; height: 100%; border: none; }
@@ -51,26 +51,27 @@ async function loadGames() {
     container.innerHTML = "";
     favContainer.innerHTML = "";
 
-    // 1. Fetch data from both folders
+    // 1. Fetch from both sources
     const gamesData = await fetchFromGitHub(GAMES_FOLDER, true);
     const ugsData = await fetchFromGitHub(UGS_FOLDER, false);
 
-    // 2. Combine and Sort A-Z
-    const allGames = [...gamesData, ...ugsData].sort((a, b) => 
-        a.name.localeCompare(b.name)
-    );
+    // 2. COMBINE AND DE-DUPLICATE
+    // This looks at the 'name' and keeps only the first one it finds (preventing clones)
+    const rawList = [...gamesData, ...ugsData];
+    const allGames = rawList.filter((game, index, self) =>
+        index === self.findIndex((g) => g.name.toLowerCase() === game.name.toLowerCase())
+    ).sort((a, b) => a.name.localeCompare(b.name));
 
-    // 3. Create the buttons
+    // 3. Render buttons
     allGames.forEach(game => {
         const displayName = game.name.replace(/-/g, ' ').toUpperCase();
         
-        // Create main list button
         const btn = document.createElement('button');
         btn.className = 'game-btn';
         btn.innerText = displayName;
         btn.onclick = () => launchDirect(game.url);
 
-        // Add to Favorites if it matches your list
+        // Add to Favorites section if it matches
         if (favorites.includes(game.name.toLowerCase())) {
             const favBtn = btn.cloneNode(true);
             favBtn.style.borderColor = "#ffd700";
@@ -94,17 +95,16 @@ async function fetchFromGitHub(folderPath, isFolderMode) {
             if (isFolderMode && item.type === "dir") {
                 collected.push({
                     name: item.name,
-                    folder: folderPath,
                     url: `https://fastly.jsdelivr.net/gh/${USER}/${REPO}@main/${folderPath}/${item.name}/index.html`
                 });
             } else if (!isFolderMode && item.name.endsWith(".html")) {
                 let cleanName = item.name.replace(".html", "");
+                // Remove "cl" prefix if it exists
                 if (cleanName.toLowerCase().startsWith("cl")) {
                     cleanName = cleanName.substring(2);
                 }
                 collected.push({
                     name: cleanName,
-                    folder: folderPath,
                     url: `https://fastly.jsdelivr.net/gh/${USER}/${REPO}@main/${folderPath}/${item.name}`
                 });
             }
@@ -113,7 +113,6 @@ async function fetchFromGitHub(folderPath, isFolderMode) {
     return collected;
 }
 
-// FIXED: Direct URL loading is the best way to handle Unity file paths and prevent errors.
 function launchDirect(url) {
     const frame = document.getElementById('game-frame');
     frame.src = url; 
@@ -125,6 +124,7 @@ function closeGame() {
     document.getElementById('game-frame').src = "";
 }
 
+// Search Functionality
 document.getElementById('game-search').addEventListener('input', (e) => {
     const val = e.target.value.toLowerCase();
     document.querySelectorAll('#sections-container .game-btn').forEach(btn => {
