@@ -28,45 +28,27 @@
     </div>
 
     <!-- EXTERNAL SOURCE: Loading the game list -->
-    <script src="https://cdn.jsdelivr.net/gh/aidenbblood-star/ugs-singlefile@28a4b25e3429aa448c63047f5e2f9c9804ad67c2/games.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/aidenbblood-star/ugs-singlefile@b7bf4b9e48c1d0d0441ff960fe0fee06ec4a090a/games.js"></script>
 
    <script>
-    // 1. Wait for everything to load
-    window.addEventListener('load', function() {
-        const searchInput = document.getElementById('game-search');
+    document.getElementById('game-search').addEventListener('input', (e) => {
+        const val = e.target.value.toLowerCase();
         
-        // 2. Optimized search for dynamic buttons
-        searchInput.addEventListener('input', (e) => {
-            const term = e.target.value.toLowerCase();
-            const allButtons = document.querySelectorAll('.game-btn');
-            
-            allButtons.forEach(btn => {
-                // We use .value because games.js creates <input type="button">
-                const gameName = btn.value.toLowerCase();
-                
-                if (gameName.includes(term)) {
-                    btn.style.display = "block";
-                    // Ensure the parent letter section is also visible
-                    btn.parentElement.parentElement.style.display = "block";
-                } else {
-                    btn.style.display = "none";
-                }
-            });
+        // 1. Filter all buttons
+        document.querySelectorAll('.game-btn').forEach(btn => {
+            const name = btn.value.toLowerCase(); 
+            btn.style.display = name.includes(val) ? "block" : "none";
+        });
 
-            // 3. Hide letter headers if all games under them are hidden
-            document.querySelectorAll('[id^="section-"]').forEach(section => {
-                const visibleButtons = section.querySelectorAll('.game-btn[style*="display: block"]');
-                const isSearching = term.length > 0;
-                
-                if (isSearching && visibleButtons.length === 0) {
-                    section.style.display = "none";
-                } else {
-                    section.style.display = "block";
-                }
-            });
+        // 2. Hide headers that have no visible games
+        document.querySelectorAll('[id^="section-"]').forEach(section => {
+            const hasVisible = Array.from(section.querySelectorAll('.game-btn'))
+                                    .some(b => b.style.display !== 'none');
+            section.style.display = hasVisible ? "block" : "none";
         });
     });
 </script>
+
 
 </body>
 </html>
