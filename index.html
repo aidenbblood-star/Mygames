@@ -39,11 +39,10 @@
 <script>    
 const USER = "aidenbblood-star";
 const REPO = "Mygames";
-
-// FIXED: Set to lowercase "ugs" to match your GitHub folder exactly
 const UGS_FOLDER = "ugs"; 
 const GAMES_FOLDER = "games";
 
+// The games that stay at the top
 let favorites = ["1v1lol", "retrobowl", "slope", "drivemad", "bitlife"];
 
 async function loadGames() {
@@ -59,6 +58,8 @@ async function loadGames() {
 
 async function fetchFromGitHub(folderPath, isFolderMode) {
     const container = document.getElementById('sections-container');
+    const favContainer = document.getElementById('favorites-container');
+    
     try {
         const response = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/${encodeURIComponent(folderPath)}`);
         if (!response.ok) return;
@@ -79,6 +80,16 @@ async function fetchFromGitHub(folderPath, isFolderMode) {
             if (gameName) {
                 const btn = document.createElement('button');
                 btn.className = 'game-btn';
+                
+                // FIXED: Adds to Favorites if the name matches your list
+                if (favorites.includes(gameName.toLowerCase())) {
+                    const favBtn = btn.cloneNode(true);
+                    favBtn.style.borderColor = "#ffd700";
+                    favBtn.innerText = "★ " + gameName.replace(/-/g, ' ').toUpperCase();
+                    favBtn.onclick = () => launchDirect(launchUrl, folderPath, gameName);
+                    favContainer.appendChild(favBtn);
+                }
+
                 btn.innerText = gameName.replace(/-/g, ' ').toUpperCase();
                 btn.onclick = () => launchDirect(launchUrl, folderPath, gameName);
                 container.appendChild(btn);
@@ -89,7 +100,6 @@ async function fetchFromGitHub(folderPath, isFolderMode) {
 
 function launchDirect(url, folder, name) {
     const frame = document.getElementById('game-frame');
-    // FIXED: Using backticks (``) so ${USER} and ${REPO} work correctly
     const baseHref = `https://cdn.jsdelivr.net/gh/${USER}/${REPO}@main/${folder}/${name}/`;
     
     fetch(url).then(res => res.text()).then(html => {
@@ -106,8 +116,17 @@ function closeGame() {
     document.getElementById('game-frame').src = "";
 }
 
+// FIXED: Added the Search Logic back in
+document.getElementById('game-search').addEventListener('input', (e) => {
+    const val = e.target.value.toLowerCase();
+    document.querySelectorAll('.game-btn').forEach(btn => {
+        btn.style.display = btn.innerText.toLowerCase().includes(val) ? "block" : "none";
+    });
+});
+
 loadGames();
 </script>
+
 
 </body>
 </html>
