@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <title>Ultimate Game Stash</title>
     <style>
-        /* Your Original Cool Black & Neon Theme - No Sidebar */
+        /* Your Original Cool Black & Neon Theme - CENTERED, NO SIDEBAR */
         body { 
             font-family: 'Segoe UI', sans-serif; 
             background: #050505; 
@@ -17,13 +17,14 @@
         .main-content { 
             flex: 1; 
             padding: 30px; 
-            max-width: 1000px; /* Centered narrow view */
+            max-width: 1000px; 
             width: 100%;
         } 
 
         h1 { text-align: center; font-size: 3rem; text-transform: uppercase; letter-spacing: -1px; margin-bottom: 30px; } 
         h2 { text-align: center; text-transform: uppercase; letter-spacing: 3px; margin-top: 40px; margin-bottom: 20px; }
         
+        /* THE SEARCH BAR */
         .search-container { text-align: center; margin-bottom: 40px; } 
         .game-search { 
             width: 90%; 
@@ -36,6 +37,7 @@
         } 
         .game-search:focus { outline: none; border-color: #00f2ff; box-shadow: 0 0 15px rgba(0, 242, 255, 0.4); } 
         
+        /* THE GAME BUTTONS */
         .game-btn { 
             background: #0f0f0f; 
             border: 1px solid #222; 
@@ -52,7 +54,6 @@
         } 
         .game-btn:hover { color: #00f2ff; border-color: #00f2ff; box-shadow: 0 0 20px rgba(0, 242, 255, 0.6); }
         
-        /* Neon Letter Headers */
         .letter-header { 
             font-size: 2rem; 
             color: #00f2ff; 
@@ -62,6 +63,7 @@
             text-align: center;
         }
 
+        /* GAME OVERLAY */
         #game-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 2000; }
         #game-frame { width: 100%; height: 100%; border: none; }
         .close-btn { position: absolute; top: 10px; right: 20px; padding: 10px 20px; background: #ff3e3e; color: white; cursor: pointer; border-radius: 5px; z-index: 2001; font-weight: bold; }
@@ -71,11 +73,13 @@
 
     <div id="game-overlay">
         <div class="close-btn" onclick="closeGame()">CLOSE GAME</div>
-        <iframe id="game-frame"></iframe>
+        <iframe id="game-frame" src=""></iframe>
     </div>
 
     <div class="main-content">
         <h1>Ultimate Game Stash</h1>
+        
+        <!-- SEARCH BAR AREA -->
         <div class="search-container">
             <input type="text" id="game-search" class="game-search" placeholder="Search through all games...">
         </div>
@@ -119,13 +123,13 @@ async function loadGames() {
             const btn = document.createElement('button');
             btn.className = 'game-btn';
             btn.innerText = displayName;
-            btn.onclick = () => launchDirect(game.url, game.baseUrl);
+            btn.onclick = () => launchDirect(game.url);
 
             if (favorites.includes(game.name.toLowerCase())) {
                 const favBtn = btn.cloneNode(true);
                 favBtn.style.borderColor = "#ffd700";
                 favBtn.innerText = "★ " + displayName;
-                favBtn.onclick = () => launchDirect(game.url, game.baseUrl);
+                favBtn.onclick = () => launchDirect(game.url);
                 favContainer.appendChild(favBtn);
             }
             section.appendChild(btn);
@@ -143,40 +147,30 @@ async function fetchFromGitHub(folder, isFolderMode) {
             let url = isFolderMode 
                 ? `https://cdn.jsdelivr.net/gh/${USER}/${REPO}@main/${folder}/${item.name}/index.html`
                 : `https://cdn.jsdelivr.net/gh/${USER}/${REPO}@main/${folder}/${item.name}`;
-            let baseUrl = isFolderMode 
-                ? `https://cdn.jsdelivr.net/gh/${USER}/${REPO}@main/${folder}/${item.name}/`
-                : `https://cdn.jsdelivr.net/gh/${USER}/${REPO}@main/${folder}/`;
-            return { name: cleanName, url, baseUrl };
+            return { name: cleanName, url };
         }).filter(item => item.name.toLowerCase() !== "index");
     } catch { return []; }
 }
 
-async function launchDirect(url, baseUrl) {
+// THE SIMPLE LAUNCHER: Best for complex Unity scripts
+function launchDirect(url) {
     const frame = document.getElementById('game-frame');
+    frame.src = url; 
     document.getElementById('game-overlay').style.display = 'block';
-    try {
-        const response = await fetch(url);
-        const html = await response.text();
-        const baseTag = `<base href="${baseUrl}">`;
-        const fullHtml = html.includes('<head>') ? html.replace('<head>', `<head>${baseTag}`) : baseTag + html;
-        const frameDoc = frame.contentWindow.document;
-        frameDoc.open();
-        frameDoc.write(fullHtml);
-        frameDoc.close();
-    } catch (err) { alert("Game failed to load from jsDelivr."); }
 }
 
 function closeGame() {
     document.getElementById('game-overlay').style.display = 'none';
-    document.getElementById('game-frame').src = "about:blank";
+    document.getElementById('game-frame').src = "";
 }
 
+// THE SEARCH LOGIC
 document.getElementById('game-search').addEventListener('input', (e) => {
     const term = e.target.value.toLowerCase();
     document.querySelectorAll('.game-btn').forEach(btn => {
         btn.style.display = btn.innerText.toLowerCase().includes(term) ? "block" : "none";
     });
-    // Hide letter headers if no games are visible in that section
+    // Hide empty letter headers
     document.querySelectorAll('.letter-section').forEach(section => {
         const hasVisible = Array.from(section.querySelectorAll('.game-btn')).some(b => b.style.display !== 'none');
         section.style.display = hasVisible ? 'block' : 'none';
