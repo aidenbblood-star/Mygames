@@ -3,155 +3,37 @@
 <head>
     <title>Ultimate Game Hub</title>
     <style>
-        /* THEME: Pure Black & Neon */
-        body {
-            background-color: #000;
-            color: #fff;
-            font-family: 'Segoe UI', sans-serif;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            overflow-x: hidden;
-        }
-
-        .main-content {
-            width: 100%;
-            max-width: 900px;
-            padding: 40px 20px;
-        }
-
-        /* ULTIMATE GAME HUB HEADER (Muted Gray) */
-        h1 {
-            color: #444; 
-            text-align: center;
-            font-size: 1.5rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 30px;
-        }
-
-        /* NEON SEARCH BAR */
+        body { background-color: #000; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; justify-content: center; }
+        .main-content { width: 100%; max-width: 900px; padding: 40px 20px; }
+        h1 { color: #444; text-align: center; font-size: 1.5rem; text-transform: uppercase; margin-bottom: 30px; }
         .search-container { text-align: center; margin-bottom: 50px; }
-        .game-search { 
-            width: 100%;
-            padding: 15px; 
-            background: #000; 
-            border: 1px solid #333; 
-            border-radius: 10px; 
-            color: #fff;
-            text-align: center;
-            font-size: 1.1rem;
-            transition: 0.3s;
-        }
-        .game-search:focus { 
-            outline: none; 
-            border-color: #00f2ff; 
-            box-shadow: 0 0 15px rgba(0, 242, 255, 0.6); 
-        }
-
-        /* SECTION HEADERS (The '0' and '1' headers) */
-        .letter-header {
-            color: #fff;
-            font-size: 14px;
-            font-weight: bold;
-            text-align: center;
-            margin: 20px 0;
-        }
-
-        /* DARK NEON BUTTONS */
+        .game-search { width: 100%; padding: 15px; background: #000; border: 1px solid #333; border-radius: 10px; color: #fff; text-align: center; font-size: 1.1rem; }
+        .game-search:focus { outline: none; border-color: #00f2ff; box-shadow: 0 0 15px rgba(0, 242, 255, 0.6); }
+        .letter-header { color: #fff; font-size: 14px; font-weight: bold; text-align: center; margin: 20px 0; }
         .buttons-container { display: flex; flex-direction: column; gap: 8px; }
-        .game-btn {
-            background: linear-gradient(180deg, #0a0a0a 0%, #050505 100%);
-            border: 1px solid #1a1a1a;
-            color: #fff;
-            padding: 16px;
-            border-radius: 8px;
-            width: 100%;
-            font-size: 13px;
-            font-weight: 600;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: 0.2s ease-in-out;
-            text-align: center;
-            outline: none;
-        }
-
-        /* THE CYAN GLOW ON HOVER */
-        .game-btn:hover, .game-btn:focus { 
-            border-color: #00f2ff;
-            color: #00f2ff;
-            box-shadow: inset 0 0 10px rgba(0, 242, 255, 0.2), 0 0 15px rgba(0, 242, 255, 0.4);
-            transform: scale(1.005);
-        }
+        .game-btn { background: linear-gradient(180deg, #0a0a0a 0%, #050505 100%); border: 1px solid #1a1a1a; color: #fff; padding: 16px; border-radius: 8px; width: 100%; font-size: 13px; font-weight: 600; text-transform: uppercase; cursor: pointer; transition: 0.2s ease-in-out; text-align: center; outline: none; }
+        .game-btn:hover { border-color: #00f2ff; color: #00f2ff; box-shadow: inset 0 0 10px rgba(0, 242, 255, 0.2), 0 0 15px rgba(0, 242, 255, 0.4); }
     </style>
 </head>
 <body>
-
     <div class="main-content">
         <h1>ULTIMATE GAME HUB</h1>
-
         <div class="search-container">
             <input type="text" id="game-search" class="game-search" placeholder="Search through all games...">
         </div>
-
-        <!-- THESE TWO IDS ARE CRITICAL TO FIX THE 'APPENDCHILD' ERROR -->
+        
+        <!-- REQUIRED IDs FOR SCRIPT TO WORK -->
         <div id="favorites-container"></div>
         <div id="sections-container"></div>
     </div>
 
-  
+    <!-- Move script here to stop 'appendChild' errors -->
+    <script src="https://cdn.jsdelivr.net/gh/bubbls/ugs-singlefile@main/games.js"></script>
 
     <script>
-        function buildUI() {
-            // Check if the game list is loaded from the external script
-            if (typeof games === 'undefined') {
-                setTimeout(buildUI, 100);
-                return;
-            }
-
-            const container = document.getElementById('sections-container');
-            const favContainer = document.getElementById('favorites-container');
-            
-            // Safety check: if containers are missing, don't run
-            if (!container || !favContainer) return;
-
-            const sortedGames = games.sort((a, b) => a.name.localeCompare(b.name));
-            
-            const groups = {};
-            sortedGames.forEach(game => {
-                const firstChar = game.name.charAt(0).toUpperCase();
-                const letter = isNaN(firstChar) ? firstChar : "1"; 
-                if (!groups[letter]) groups[letter] = [];
-                groups[letter].push(game);
-            });
-
-            Object.keys(groups).sort().forEach(letter => {
-                const section = document.createElement('div');
-                section.id = `section-${letter}`;
-                section.innerHTML = `<div class="letter-header">${letter}</div><div class="buttons-container" id="btns-${letter}"></div>`;
-                container.appendChild(section);
-
-                groups[letter].forEach(game => {
-                    const btn = document.createElement('button');
-                    btn.className = 'game-btn';
-                    btn.innerText = game.name;
-                    btn.onclick = () => window.location.href = game.url;
-                    document.getElementById(`btns-${letter}`).appendChild(btn);
-                });
-            });
-        }
-
-        document.getElementById('game-search').addEventListener('input', (e) => {
-            const val = e.target.value.toLowerCase();
-            document.querySelectorAll('.game-btn').forEach(btn => {
-                btn.style.display = btn.innerText.toLowerCase().includes(val) ? "block" : "none";
-            });
+        window.addEventListener('load', () => {
+            if (typeof buildUI === 'function') buildUI();
         });
-
-        // Use 'load' event to ensure everything is ready
-        window.addEventListener('load', buildUI);
     </script>
-    <!-- Script at the bottom so elements load first -->
-    <script src="https://cdn.jsdelivr.net/gh/bubbls/ugs-singlefile@main/games.js"></script>
 </body>
 </html>
