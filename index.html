@@ -1,125 +1,99 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-us">
 <head>
     <meta charset="utf-8">
-    <title>Ultimate Game Stash Pro</title>
+    <title>Ultimate Game Stash</title>
     <style>
-        :root {
-            --neon-blue: #00f2ff;
-            --sidebar-bg: rgba(255, 255, 255, 0.05);
-            --button-bg: rgba(255, 255, 255, 0.1);
-        }
+        /* Your Original Cool Black & Neon Theme - No Sidebar */
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background: #050505; 
+            color: #ffffff; 
+            margin: 0; 
+            display: flex; 
+            justify-content: center; 
+        } 
 
-        /* 1. COOL ANIMATED BACKGROUND */
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background: linear-gradient(-45deg, #050505, #1a1a2e, #16213e, #0f3460);
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
-            min-height: 100vh;
-            margin: 0;
-            display: flex;
-            color: #fff;
-        }
+        .main-content { 
+            flex: 1; 
+            padding: 30px; 
+            max-width: 1000px; /* Centered narrow view */
+            width: 100%;
+        } 
 
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        /* 2. GLASSMORPHISM SIDEBAR */
-        .sidebar {
-            position: fixed;
-            left: 0; top: 0; width: 80px; height: 100vh;
-            background: var(--sidebar-bg);
-            backdrop-filter: blur(15px);
-            border-right: 1px solid rgba(255,255,255,0.1);
-            display: flex; flex-direction: column; gap: 10px;
-            padding: 20px 10px; overflow-y: auto; z-index: 1000;
-        }
-
-        .sidebar-btn {
-            background: var(--button-bg);
-            border: 1px solid rgba(255,255,255,0.1);
-            padding: 12px; border-radius: 10px; color: #fff;
-            font-weight: bold; cursor: pointer; transition: 0.3s;
-        }
-
-        .sidebar-btn:hover {
-            border-color: var(--neon-blue);
-            box-shadow: 0 0 15px var(--neon-blue);
-            transform: scale(1.1);
-        }
-
-        /* 3. MAIN CONTENT & SEARCH */
-        .main-content { margin-left: 110px; flex: 1; padding: 40px; }
+        h1 { text-align: center; font-size: 3rem; text-transform: uppercase; letter-spacing: -1px; margin-bottom: 30px; } 
+        h2 { text-align: center; text-transform: uppercase; letter-spacing: 3px; margin-top: 40px; margin-bottom: 20px; }
         
-        .search-container { text-align: center; margin-bottom: 50px; }
+        .search-container { text-align: center; margin-bottom: 40px; } 
+        .game-search { 
+            width: 90%; 
+            padding: 15px; 
+            background: #1a1a1a; 
+            border: 1px solid #333; 
+            border-radius: 10px; 
+            color: #fff; 
+            font-size: 1rem;
+        } 
+        .game-search:focus { outline: none; border-color: #00f2ff; box-shadow: 0 0 15px rgba(0, 242, 255, 0.4); } 
         
-        .game-search {
-            width: 70%; padding: 15px 25px;
-            background: rgba(0,0,0,0.4);
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 30px; color: #fff; font-size: 1.1rem;
-            backdrop-filter: blur(5px); transition: 0.3s;
+        .game-btn { 
+            background: #0f0f0f; 
+            border: 1px solid #222; 
+            padding: 18px; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            color: #eee; 
+            width: 100%; 
+            margin-bottom: 12px; 
+            transition: 0.3s; 
+            font-weight: bold; 
+            text-align: center; 
+            display: block; 
+        } 
+        .game-btn:hover { color: #00f2ff; border-color: #00f2ff; box-shadow: 0 0 20px rgba(0, 242, 255, 0.6); }
+        
+        /* Neon Letter Headers */
+        .letter-header { 
+            font-size: 2rem; 
+            color: #00f2ff; 
+            border-bottom: 1px solid #222; 
+            margin: 40px 0 20px 0; 
+            padding-bottom: 5px; 
+            text-align: center;
         }
 
-        .game-search:focus {
-            outline: none; border-color: var(--neon-blue);
-            box-shadow: 0 0 20px rgba(0, 242, 255, 0.4);
-        }
-
-        /* 4. GAME BUTTONS (NEON STYLE) */
-        .letter-section { margin-bottom: 50px; }
-        .letter-header { font-size: 2.5rem; margin-bottom: 20px; border-bottom: 2px solid var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue); }
-
-        .game-btn {
-            background: var(--button-bg);
-            border: 1px solid rgba(255,255,255,0.1);
-            padding: 20px; border-radius: 15px; color: #eee;
-            width: 100%; text-align: left; font-size: 1.1rem;
-            margin-bottom: 12px; cursor: pointer; transition: 0.3s;
-            backdrop-filter: blur(10px);
-        }
-
-        .game-btn:hover {
-            background: rgba(0, 242, 255, 0.1);
-            border-color: var(--neon-blue);
-            color: #fff; transform: translateY(-5px);
-            box-shadow: 0 5px 20px rgba(0, 242, 255, 0.3);
-        }
-
-        /* GAME OVERLAY */
-        #game-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 2000; }
+        #game-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 2000; }
         #game-frame { width: 100%; height: 100%; border: none; }
-        .close-btn { position: absolute; top: 20px; right: 30px; padding: 12px 25px; background: #ff3e3e; color: #fff; cursor: pointer; border-radius: 8px; font-weight: bold; }
+        .close-btn { position: absolute; top: 10px; right: 20px; padding: 10px 20px; background: #ff3e3e; color: white; cursor: pointer; border-radius: 5px; z-index: 2001; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <div class="sidebar" id="sidebar"></div>
-
     <div id="game-overlay">
         <div class="close-btn" onclick="closeGame()">CLOSE GAME</div>
-        <iframe id="game-frame" src=""></iframe>
+        <iframe id="game-frame"></iframe>
     </div>
 
     <div class="main-content">
-        <h1>ULTIMATE GAME STASH</h1>
+        <h1>Ultimate Game Stash</h1>
         <div class="search-container">
-            <input type="text" id="game-search" class="game-search" placeholder="Type to search games...">
+            <input type="text" id="game-search" class="game-search" placeholder="Search through all games...">
         </div>
+        
+        <h2 style="color: #ffd700;">★ Top Picks ★</h2>
+        <div id="favorites-container" style="border-bottom: 1px solid #222; padding-bottom: 20px; margin-bottom: 20px;"></div>
+        
         <div id="sections-container"></div>
     </div>
 
-<script>
+<script>    
 const USER = "aidenbblood-star";
 const REPO = "Mygames";
+const favorites = ["1v1lol", "retrobowl", "slope", "drivemad", "bitlife", "10minutestildawn"];
 
 async function loadGames() {
-    const sections = document.getElementById('sections-container');
-    const sidebar = document.getElementById('sidebar');
+    const container = document.getElementById('sections-container');
+    const favContainer = document.getElementById('favorites-container');
 
     const gamesData = await fetchFromGitHub("games", true);
     const ugsData = await fetchFromGitHub("ugs", false);
@@ -136,25 +110,27 @@ async function loadGames() {
     });
 
     Object.keys(groups).sort().forEach(letter => {
-        const sideBtn = document.createElement('button');
-        sideBtn.className = 'sidebar-btn';
-        sideBtn.innerText = letter;
-        sideBtn.onclick = () => document.getElementById(`section-${letter}`).scrollIntoView({behavior: 'smooth'});
-        sidebar.appendChild(sideBtn);
-
         const section = document.createElement('div');
         section.className = 'letter-section';
-        section.id = `section-${letter}`;
         section.innerHTML = `<div class="letter-header">${letter}</div>`;
         
         groups[letter].forEach(game => {
+            const displayName = game.name.replace(/-/g, ' ').toUpperCase();
             const btn = document.createElement('button');
             btn.className = 'game-btn';
-            btn.innerText = game.name.toUpperCase();
-            btn.onclick = () => launchGame(game.url);
+            btn.innerText = displayName;
+            btn.onclick = () => launchDirect(game.url, game.baseUrl);
+
+            if (favorites.includes(game.name.toLowerCase())) {
+                const favBtn = btn.cloneNode(true);
+                favBtn.style.borderColor = "#ffd700";
+                favBtn.innerText = "★ " + displayName;
+                favBtn.onclick = () => launchDirect(game.url, game.baseUrl);
+                favContainer.appendChild(favBtn);
+            }
             section.appendChild(btn);
         });
-        sections.appendChild(section);
+        container.appendChild(section);
     });
 }
 
@@ -163,39 +139,47 @@ async function fetchFromGitHub(folder, isFolderMode) {
         const res = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/${folder}`);
         const items = await res.json();
         return items.map(item => {
-            let cleanName = item.name.replace(".html", "").replace(/-/g, ' ');
-            if (cleanName.toLowerCase().startsWith("cl")) cleanName = cleanName.substring(2);
-            
+            let cleanName = item.name.replace(".html", "").replace(/^cl/i, "").replace(/-/g, ' ');
             let url = isFolderMode 
                 ? `https://cdn.jsdelivr.net/gh/${USER}/${REPO}@main/${folder}/${item.name}/index.html`
                 : `https://cdn.jsdelivr.net/gh/${USER}/${REPO}@main/${folder}/${item.name}`;
-            return { name: cleanName, url };
+            let baseUrl = isFolderMode 
+                ? `https://cdn.jsdelivr.net/gh/${USER}/${REPO}@main/${folder}/${item.name}/`
+                : `https://cdn.jsdelivr.net/gh/${USER}/${REPO}@main/${folder}/`;
+            return { name: cleanName, url, baseUrl };
         }).filter(item => item.name.toLowerCase() !== "index");
     } catch { return []; }
 }
 
-function launchGame(url) {
-    document.getElementById('game-frame').src = url;
+async function launchDirect(url, baseUrl) {
+    const frame = document.getElementById('game-frame');
     document.getElementById('game-overlay').style.display = 'block';
+    try {
+        const response = await fetch(url);
+        const html = await response.text();
+        const baseTag = `<base href="${baseUrl}">`;
+        const fullHtml = html.includes('<head>') ? html.replace('<head>', `<head>${baseTag}`) : baseTag + html;
+        const frameDoc = frame.contentWindow.document;
+        frameDoc.open();
+        frameDoc.write(fullHtml);
+        frameDoc.close();
+    } catch (err) { alert("Game failed to load from jsDelivr."); }
 }
 
 function closeGame() {
     document.getElementById('game-overlay').style.display = 'none';
-    document.getElementById('game-frame').src = "";
+    document.getElementById('game-frame').src = "about:blank";
 }
 
-// SEARCH FUNCTIONALITY
 document.getElementById('game-search').addEventListener('input', (e) => {
     const term = e.target.value.toLowerCase();
+    document.querySelectorAll('.game-btn').forEach(btn => {
+        btn.style.display = btn.innerText.toLowerCase().includes(term) ? "block" : "none";
+    });
+    // Hide letter headers if no games are visible in that section
     document.querySelectorAll('.letter-section').forEach(section => {
-        let hasVisibleGame = false;
-        section.querySelectorAll('.game-btn').forEach(btn => {
-            const match = btn.innerText.toLowerCase().includes(term);
-            btn.style.display = match ? "block" : "none";
-            if (match) hasVisibleGame = true;
-        });
-        // Hide the whole A, B, C section if no games match
-        section.style.display = hasVisibleGame ? "block" : "none";
+        const hasVisible = Array.from(section.querySelectorAll('.game-btn')).some(b => b.style.display !== 'none');
+        section.style.display = hasVisible ? 'block' : 'none';
     });
 });
 
