@@ -12,7 +12,7 @@
         .search-container { text-align: center; margin-bottom: 40px; } 
         .game-search { width: 80%; padding: 15px; background: #1a1a1a; border: 1px solid #333; border-radius: 10px; color: #fff; } 
         .game-search:focus { outline: none; border-color: #00f2ff; box-shadow: 0 0 15px rgba(0, 242, 255, 0.4); } 
-        .game-btn { background: #0f0f0f; border: 1px solid #222; padding: 18px; border-radius: 12px; cursor: pointer; color: #eee; width: 100%; margin-bottom: 12px; transition: 0.3s; font-weight: bold; text-align: center; } 
+        .game-btn { background: #0f0f0f; border: 1px solid #222; padding: 18px; border-radius: 12px; cursor: pointer; color: #eee; width: 100%; margin-bottom: 12px; transition: 0.3s; font-weight: bold; text-align: center; display: block; text-decoration: none; } 
         .game-btn:hover { color: #00f2ff; border-color: #00f2ff; box-shadow: 0 0 20px rgba(0, 242, 255, 0.6); }
         #game-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 100; }
         #game-frame { width: 100%; height: 100%; border: none; }
@@ -23,7 +23,7 @@
 
     <div id="game-overlay">
         <div class="close-btn" onclick="closeGame()">CLOSE GAME</div>
-        <iframe id="game-frame"></iframe>
+        <iframe id="game-frame" src=""></iframe>
     </div>
 
     <div class="main-content">
@@ -36,6 +36,7 @@
         <h2 style="color: #444;">All Games</h2>
         <div id="sections-container"></div>
     </div>
+
 <script>    
 const USER = "aidenbblood-star";
 const REPO = "Mygames";
@@ -61,21 +62,23 @@ async function loadGames() {
 
     // 3. Create the buttons
     allGames.forEach(game => {
+        const displayName = game.name.replace(/-/g, ' ').toUpperCase();
+        
+        // Create main list button
         const btn = document.createElement('button');
         btn.className = 'game-btn';
-        const displayName = game.name.replace(/-/g, ' ').toUpperCase();
+        btn.innerText = displayName;
+        btn.onclick = () => launchDirect(game.url);
 
         // Add to Favorites if it matches your list
         if (favorites.includes(game.name.toLowerCase())) {
             const favBtn = btn.cloneNode(true);
             favBtn.style.borderColor = "#ffd700";
             favBtn.innerText = "★ " + displayName;
-            favBtn.onclick = () => launchDirect(game.url, game.folder, game.name);
+            favBtn.onclick = () => launchDirect(game.url);
             favContainer.appendChild(favBtn);
         }
 
-        btn.innerText = displayName;
-        btn.onclick = () => launchDirect(game.url, game.folder, game.name);
         container.appendChild(btn);
     });
 }
@@ -95,8 +98,12 @@ async function fetchFromGitHub(folderPath, isFolderMode) {
                     url: `https://fastly.jsdelivr.net/gh/${USER}/${REPO}@main/${folderPath}/${item.name}/index.html`
                 });
             } else if (!isFolderMode && item.name.endsWith(".html")) {
+                let cleanName = item.name.replace(".html", "");
+                if (cleanName.toLowerCase().startsWith("cl")) {
+                    cleanName = cleanName.substring(2);
+                }
                 collected.push({
-                    name: item.name.replace(".html", "").replace(/^cl/i, ""),
+                    name: cleanName,
                     folder: folderPath,
                     url: `https://fastly.jsdelivr.net/gh/${USER}/${REPO}@main/${folderPath}/${item.name}`
                 });
@@ -106,17 +113,11 @@ async function fetchFromGitHub(folderPath, isFolderMode) {
     return collected;
 }
 
-function launchDirect(url, folder, name) {
+// FIXED: Direct URL loading is the best way to handle Unity file paths and prevent errors.
+function launchDirect(url) {
     const frame = document.getElementById('game-frame');
-    const baseHref = `https://cdn.jsdelivr.net/gh/${USER}/${REPO}@main/${folder}/${name}/`;
-    
-    fetch(url).then(res => res.text()).then(html => {
-        const baseTag = `<base href="${baseHref}">`;
-        const fullHtml = html.includes('<head>') ? html.replace('<head>', `<head>${baseTag}`) : baseTag + html;
-        const blob = new Blob([fullHtml], { type: 'text/html' });
-        frame.src = URL.createObjectURL(blob);
-        document.getElementById('game-overlay').style.display = 'block';
-    }).catch(err => alert("Game failed to load."));
+    frame.src = url; 
+    document.getElementById('game-overlay').style.display = 'block';
 }
 
 function closeGame() {
@@ -134,8 +135,5 @@ document.getElementById('game-search').addEventListener('input', (e) => {
 loadGames();
 </script>
 
-
-
 </body>
 </html>
-
