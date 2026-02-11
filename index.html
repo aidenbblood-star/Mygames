@@ -35,24 +35,28 @@
 <script>    
 const USER = "aidenbblood-star";
 const REPO = "Mygames";
-const BRANCH = "main"; // Change to 'master' if your branch name is different
-const favorites = ["1v1lol", "retrobowl", "slope", "drivemad", "bitlife", "10minutestildawn"];
+const BRANCH = "main"; 
 
-async function fetchFromGitHub(path) {
-    try {
-        const response = await fetch(`https://api.github.com/gh/${USER}/${REPO}/contents/${path}`);
-        return await response.json();
-    } catch (e) { return []; }
-}
+// 1. HARDCODE YOUR GAMES HERE
+// This replaces the "fetch" that was breaking.
+// Use the folder name as the 'path' and whatever you want for 'name'.
+const gamesList = [
+    { name: "10 Minutes Till Dawn", path: "ugs/10minutestildawn" },
+    { name: "1v1.lol", path: "ugs/1v1lol" },
+    { name: "Retro Bowl", path: "ugs/retrobowl" },
+    { name: "Slope", path: "ugs/slope" },
+    { name: "Drive Mad", path: "ugs/drivemad" },
+    { name: "Bitlife", path: "ugs/bitlife" }
+];
+
+const favorites = ["1v1lol", "retrobowl", "slope", "drivemad", "bitlife", "10minutestildawn"];
 
 function launchGame(folderPath) {
     const overlay = document.getElementById('game-overlay');
     const frame = document.getElementById('game-frame');
     
-    // JSDELIVR FIX: Use the jsDelivr CDN URL for the index.html
-    // This allows the merge-script to find .part files on the CDN
-    const jsdelivrBase = `https://cdn.jsdelivr.net/gh/${USER}/${REPO}@${BRANCH}/${folderPath}/`;
-    const gameUrl = jsdelivrBase + "index.html";
+    // Uses jsDelivr for the actual game files (files don't have the same API rate limit)
+    const gameUrl = `https://cdn.jsdelivr.net/gh/${USER}/${REPO}@${BRANCH}/${folderPath}/index.html`;
     
     frame.src = gameUrl;
     overlay.style.display = 'block';
@@ -65,30 +69,42 @@ function closeGame() {
     document.body.style.overflow = 'auto';
 }
 
-async function loadGames() {
+function loadGames() {
     const container = document.getElementById('sections-container');
     const favContainer = document.getElementById('favorites-container');
+    
+    container.innerHTML = ""; 
+    favContainer.innerHTML = "";
 
-    const gamesData = await fetchFromGitHub("games");
-    const ugsData = await fetchFromGitHub("ugs");
-    let allGames = [...gamesData, ...ugsData].filter(item => item.type === "dir");
-
-    allGames.forEach(game => {
+    gamesList.forEach(game => {
         const btn = document.createElement('div');
         btn.className = 'game-btn';
-        btn.innerText = game.name.toUpperCase().replace(/-/g, ' ');
+        btn.innerText = game.name.toUpperCase();
         btn.onclick = () => launchGame(game.path);
 
-        if (favorites.includes(game.name.toLowerCase())) {
+        // Add to Favorites if it matches
+        const simpleName = game.path.split('/').pop().toLowerCase();
+        if (favorites.includes(simpleName)) {
             const favBtn = btn.cloneNode(true);
             favBtn.onclick = () => launchGame(game.path);
             favContainer.appendChild(favBtn);
         }
+
         container.appendChild(btn);
     });
 }
 
+function searchGames() {
+    let input = document.getElementById('game-search').value.toLowerCase();
+    let btns = document.getElementsByClassName('game-btn');
+    for (let i = 0; i < btns.length; i++) {
+        btns[i].style.display = btns[i].innerText.toLowerCase().includes(input) ? "block" : "none";
+    }
+}
+
+// Run immediately
 loadGames();
 </script>
+
 </body>
 </html>
