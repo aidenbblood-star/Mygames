@@ -31,56 +31,35 @@
       <!-- EXTERNAL SOURCE: Loading the game list -->
     <script src="https://cdn.jsdelivr.net/gh/aidenbblood-star/ugs-singlefile@main/games.js"></script>
 
-    <script>
-        // Use DOMContentLoaded to ensure elements exist before the script runs
-        document.addEventListener('DOMContentLoaded', function() {
-            function buildUI() {
-                if (typeof games === 'undefined') {
-                    setTimeout(buildUI, 100);
-                    return;
-                }
 
-                const container = document.getElementById('sections-container');
-                const favContainer = document.getElementById('favorites-container');
-                
-                // Safety check to prevent the 'null' error
-                if (!container || !favContainer) return;
+<script>
+    function initApp() {
+        // We check for 'manualList' because that is what's in your games.js
+        if (typeof manualList !== 'undefined') {
+            buildStash(); // This function is defined inside your games.js
+            setupSearch();
+        } else {
+            setTimeout(initApp, 100);
+        }
+    }
 
-                const sortedGames = games.sort((a, b) => a.name.localeCompare(b.name));
-                const groups = {};
-                sortedGames.forEach(game => {
-                    const firstChar = game.name.charAt(0).toUpperCase();
-                    const letter = isNaN(firstChar) ? firstChar : "1"; 
-                    if (!groups[letter]) groups[letter] = [];
-                    groups[letter].push(game);
-                });
+    function setupSearch() {
+        const searchInput = document.getElementById('game-search');
+        if (!searchInput) return;
 
-                Object.keys(groups).sort().forEach(letter => {
-                    const section = document.createElement('div');
-                    section.id = `section-${letter}`;
-                    section.innerHTML = `<div class="letter-header">${letter}</div><div class="buttons-container" id="btns-${letter}"></div>`;
-                    container.appendChild(section);
-
-                    groups[letter].forEach(game => {
-                        const btn = document.createElement('button');
-                        btn.className = 'game-btn';
-                        btn.innerText = game.name;
-                        btn.onclick = () => window.location.href = game.url;
-                        document.getElementById(`btns-${letter}`).appendChild(btn);
-                    });
-                });
-            }
-
-            document.getElementById('game-search').addEventListener('input', (e) => {
-                const val = e.target.value.toLowerCase();
-                document.querySelectorAll('.game-btn').forEach(btn => {
-                    btn.style.display = btn.innerText.toLowerCase().includes(val) ? "block" : "none";
-                });
+        searchInput.addEventListener('input', (e) => {
+            const val = e.target.value.toLowerCase();
+            // Your games.js uses .game-btn class, so we target those
+            document.querySelectorAll('.game-btn').forEach(btn => {
+                const name = btn.value.toLowerCase(); 
+                btn.style.display = name.includes(val) ? "block" : "none";
             });
-
-            buildUI();
         });
-    </script>
+    }
+
+    document.addEventListener('DOMContentLoaded', initApp);
+</script>
+
 </body>
 </html>
 
