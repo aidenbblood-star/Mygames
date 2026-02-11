@@ -34,73 +34,112 @@
 <script>    
 const USER = "aidenbblood-star";
 const REPO = "Mygames";
-const BRANCH = "main"; // Change to 'master' if your branch name is different
-const favorites = ["1v1lol", "retrobowl", "slope", "drivemad", "bitlife", "10minutestildawn"];
+const UGS_FOLDER = "ugs"; 
+const GAMES_FOLDER = "games";
 
-async function fetchFromGitHub(path) {
-    try {
-        const response = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/${path}`);
-        const data = await response.json();
-        // If it's a valid folder, return the files; otherwise return empty list
-        return Array.isArray(data) ? data : [];
-    } catch (e) { return []; }
+let favorites = ["1v1lol", "retrobowl", "slope", "drivemad", "bitlife", "10minutestildawn"];
+
+async function loadGames() {
+    const container = document.getElementById('sections-container');
+    const favContainer = document.getElementById('favorites-container');
+    container.innerHTML = "Scanning for games...";
+    favContainer.innerHTML = "";
+
+    // 1. Fetch data from both folders
+    const gamesData = await fetchFromGitHub(GAMES_FOLDER, true);
+    const ugsData = await fetchFromGitHub(UGS_FOLDER, false);
+
+    // 2. COMBINE AND REMOVE DUPLICATES
+    // We use a Map keyed by the lowercase name to ensure each game is unique
+    const uniqueGamesMap = new Map();
+    [...gamesData, ...ugsData].forEach(game => {
+        const lowerName = game.name.toLowerCase();
+        if (!uniqueGamesMap.has(lowerName)) {
+            uniqueGamesMap.set(lowerName, game);
+        }
+    });
+
+    // 3. Convert Map back to array and Sort A-Z
+    const allGames = Array.from(uniqueGamesMap.values()).sort((a, b) => 
+        a.name.localeCompare(b.name)
+    );
+
+    container.innerHTML = ""; // Clear loading text
+
+    // 4. Create the buttons
+    allGames.forEach(game => {
+        const btn = document.createElement('button');
+        btn.className = 'game-btn';
+        const displayName = game.name.replace(/-/g, ' ').toUpperCase();
+
+        // Add to Favorites if it matches your list
+        if (favorites.includes(game.name.toLowerCase())) {
+            const favBtn = btn.cloneNode(true);
+            favBtn.style.borderColor = "#ffd700";
+            favBtn.innerText = "★ " + displayName;
+            favBtn.onclick = () => launchDirect(game.url, game.folder, game.name);
+            favContainer.appendChild(favBtn);
+        }
+
+        btn.innerText = displayName;
+        btn.onclick = () => launchDirect(game.url, game.folder, game.name);
+        container.appendChild(btn);
+    });
 }
 
-function launchGame(folderPath) {
-    const overlay = document.getElementById('game-overlay');
+async function fetchFromGitHub(folderPath, isFolderMode) {
+    let collected = [];
+    try {
+        const response = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/${encodeURIComponent(folderPath)}`);
+        if (!response.ok) return [];
+        const items = await response.json();
+
+        items.forEach(item => {
+            if (isFolderMode && item.type === "dir") {
+                collected.push({
+                    name: item.name,
+                    folder: folderPath,
+                    url: `https://fastly.jsdelivr.net/gh/${USER}/${REPO}@main/${folderPath}/${item.name}/index.html`
+                });
+            } else if (!isFolderMode && item.name.endsWith(".html")) {
+                collected.push({
+                    name: item.name.replace(".html", "").replace(/^cl/i, ""),
+                    folder: folderPath,
+                    url: `https://fastly.jsdelivr.net/gh/${USER}/${REPO}@main/${folderPath}/${item.name}`
+                });
+            }
+        });
+    } catch (err) { console.error("Fetch failed", err); }
+    return collected;
+}
+
+function launchDirect(url, folder, name) {
     const frame = document.getElementById('game-frame');
-    // Using the direct jsDelivr URL that works for most games
-    frame.src = `https://cdn.jsdelivr.net/gh/${USER}/${REPO}@${BRANCH}/${folderPath}/index.html`;
-    overlay.style.display = 'block';
-    document.body.style.overflow = 'hidden'; 
+    const baseHref = `https://cdn.jsdelivr.net/gh/${USER}/${REPO}@main/${folder}/${name}/`;
+    
+    fetch(url).then(res => res.text()).then(html => {
+        const baseTag = `<base href="${baseHref}">`;
+        const fullHtml = html.includes('<head>') ? html.replace('<head>', `<head>${baseTag}`) : baseTag + html;
+        const blob = new Blob([fullHtml], { type: 'text/html' });
+        frame.src = URL.createObjectURL(blob);
+        document.getElementById('game-overlay').style.display = 'block';
+    }).catch(err => alert("Game failed to load."));
 }
 
 function closeGame() {
     document.getElementById('game-overlay').style.display = 'none';
     document.getElementById('game-frame').src = "";
-    document.body.style.overflow = 'auto';
 }
 
-async function loadGames() {
-    const container = document.getElementById('sections-container');
-    const favContainer = document.getElementById('favorites-container');
-    
-    // FETCH BOTH FOLDERS
-    const gamesData = await fetchFromGitHub("games");
-    const ugsData = await fetchFromGitHub("ugs");
-    
-    // Combine them into one big list without any complex filtering
-    let allGames = [...gamesData, ...ugsData].filter(item => item.type === "dir");
-
-    container.innerHTML = "";
-    favContainer.innerHTML = "";
-
-    allGames.forEach(game => {
-        const btn = document.createElement('div');
-        btn.className = 'game-btn';
-        btn.innerText = game.name.toUpperCase().replace(/-/g, ' ');
-        btn.onclick = () => launchGame(game.path);
-
-        // Add to Top Picks if in favorites list
-        if (favorites.includes(game.name.toLowerCase())) {
-            const favBtn = btn.cloneNode(true);
-            favBtn.onclick = () => launchGame(game.path);
-            favContainer.appendChild(favBtn);
-        }
-        
-        container.appendChild(btn);
+document.getElementById('game-search').addEventListener('input', (e) => {
+    const val = e.target.value.toLowerCase();
+    document.querySelectorAll('#sections-container .game-btn').forEach(btn => {
+        btn.style.display = btn.innerText.toLowerCase().includes(val) ? "block" : "none";
     });
-}
-
-function searchGames() {
-    let input = document.getElementById('game-search').value.toLowerCase();
-    let btns = document.getElementById('sections-container').getElementsByClassName('game-btn');
-    for (let i = 0; i < btns.length; i++) {
-        btns[i].style.display = btns[i].innerText.toLowerCase().includes(input) ? "block" : "none";
-    }
-}
+});
 
 loadGames();
 </script>
+
 </body>
 </html>
