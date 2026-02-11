@@ -42,60 +42,68 @@ const REPO = "Mygames";
 const UGS_FOLDER = "ugs"; 
 const GAMES_FOLDER = "games";
 
-// The games that stay at the top
 let favorites = ["1v1lol", "retrobowl", "slope", "drivemad", "bitlife"];
 
 async function loadGames() {
     const container = document.getElementById('sections-container');
     const favContainer = document.getElementById('favorites-container');
-    // Clear containers before loading
     container.innerHTML = "";
     favContainer.innerHTML = "";
 
-    await fetchFromGitHub(GAMES_FOLDER, true);
-    await fetchFromGitHub(UGS_FOLDER, false);
+    // 1. Fetch data from both folders
+    const gamesData = await fetchFromGitHub(GAMES_FOLDER, true);
+    const ugsData = await fetchFromGitHub(UGS_FOLDER, false);
+
+    // 2. Combine and Sort A-Z
+    const allGames = [...gamesData, ...ugsData].sort((a, b) => 
+        a.name.localeCompare(b.name)
+    );
+
+    // 3. Create the buttons
+    allGames.forEach(game => {
+        const btn = document.createElement('button');
+        btn.className = 'game-btn';
+        const displayName = game.name.replace(/-/g, ' ').toUpperCase();
+
+        // Add to Favorites if it matches your list
+        if (favorites.includes(game.name.toLowerCase())) {
+            const favBtn = btn.cloneNode(true);
+            favBtn.style.borderColor = "#ffd700";
+            favBtn.innerText = "★ " + displayName;
+            favBtn.onclick = () => launchDirect(game.url, game.folder, game.name);
+            favContainer.appendChild(favBtn);
+        }
+
+        btn.innerText = displayName;
+        btn.onclick = () => launchDirect(game.url, game.folder, game.name);
+        container.appendChild(btn);
+    });
 }
 
 async function fetchFromGitHub(folderPath, isFolderMode) {
-    const container = document.getElementById('sections-container');
-    const favContainer = document.getElementById('favorites-container');
-    
+    let collected = [];
     try {
         const response = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/${encodeURIComponent(folderPath)}`);
-        if (!response.ok) return;
+        if (!response.ok) return [];
         const items = await response.json();
 
         items.forEach(item => {
-            let gameName = "";
-            let launchUrl = "";
-
             if (isFolderMode && item.type === "dir") {
-                gameName = item.name;
-                launchUrl = `https://fastly.jsdelivr.net/gh/${USER}/${REPO}@main/${folderPath}/${gameName}/index.html`;
+                collected.push({
+                    name: item.name,
+                    folder: folderPath,
+                    url: `https://fastly.jsdelivr.net/gh/${USER}/${REPO}@main/${folderPath}/${item.name}/index.html`
+                });
             } else if (!isFolderMode && item.name.endsWith(".html")) {
-                // FIXED: Correctly removes .html and the 'cl' prefix
-                gameName = item.name.replace(".html", "").replace(/^cl/i, "");
-                launchUrl = `https://fastly.jsdelivr.net/gh/${USER}/${REPO}@main/${folderPath}/${item.name}`;
-            }
-
-            if (gameName) {
-                const btn = document.createElement('button');
-                btn.className = 'game-btn';
-                
-                if (favorites.includes(gameName.toLowerCase())) {
-                    const favBtn = btn.cloneNode(true);
-                    favBtn.style.borderColor = "#ffd700";
-                    favBtn.innerText = "★ " + gameName.replace(/-/g, ' ').toUpperCase();
-                    favBtn.onclick = () => launchDirect(launchUrl, folderPath, gameName);
-                    favContainer.appendChild(favBtn);
-                }
-
-                btn.innerText = gameName.replace(/-/g, ' ').toUpperCase();
-                btn.onclick = () => launchDirect(launchUrl, folderPath, gameName);
-                container.appendChild(btn);
+                collected.push({
+                    name: item.name.replace(".html", "").replace(/^cl/i, ""),
+                    folder: folderPath,
+                    url: `https://fastly.jsdelivr.net/gh/${USER}/${REPO}@main/${folderPath}/${item.name}`
+                });
             }
         });
-    } catch (err) { console.error("Load failed", err); }
+    } catch (err) { console.error("Fetch failed", err); }
+    return collected;
 }
 
 function launchDirect(url, folder, name) {
@@ -118,13 +126,14 @@ function closeGame() {
 
 document.getElementById('game-search').addEventListener('input', (e) => {
     const val = e.target.value.toLowerCase();
-    document.querySelectorAll('.game-btn').forEach(btn => {
+    document.querySelectorAll('#sections-container .game-btn').forEach(btn => {
         btn.style.display = btn.innerText.toLowerCase().includes(val) ? "block" : "none";
     });
 });
 
 loadGames();
 </script>
+
 
 
 </body>
