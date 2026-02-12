@@ -32,7 +32,7 @@
 
     // LOAD GAMES.JS
     const script = document.createElement('script');
-    script.src = `https://cdn.jsdelivr.net/gh/${myUser}/${myRepo}@${window.GAME_HASH}/src/games.js?t=978`;
+    script.src = `https://fastly.jsdelivr.net/gh/${myUser}/${myRepo}@${window.GAME_HASH}/src/games.js?t=978`;
     
     script.onload = () => { 
         console.log("File found! Checking for buildStash...");
