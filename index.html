@@ -98,7 +98,9 @@
         // THIS IS THE FIX: Only call the file once, and use a specific version number to clear cache
         const script = document.createElement('script');
         // Added ?v=99 to the end to force jsDelivr to stop showing the "Package Size" error
-        script.src = "<script src="https://cdn.jsdelivr.net/gh/aidenbblood-star/ugs-singlefile@89b7686959f3962854a3547928e336ea7573a49b/src/games.js?v=979"></script>
+       // CORRECTED: Just the URL string, no extra <script> tags inside
+script.src = "https://cdn.jsdelivr.net/gh/aidenbblood-star/ugs-singlefile@89b7686959f3962854a3547928e336ea7573a49b/src/games.js?v=979";
+
 
         script.async = true; 
         
