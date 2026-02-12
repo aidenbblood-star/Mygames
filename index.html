@@ -22,14 +22,18 @@
         const myHash = "d7c33a5ddd82aa8661cf710ef47c297f860ebe0d"; // Your current working hash
 
         // 1. AUTO-FIX: Intercepts game clicks and injects the hash
+               // 1. AUTO-FIX: This forces the browser to see HTML instead of Code
         window.open = (function(n) {
             return function(url, name, specs) {
                 if (url && url.includes('jsdelivr.net')) {
-                    url = url.replace(/@main|@latest/, '@' + myHash);
+                    // 1. Injects the Hash
+                    // 2. Adds a Random Version (?v=) to clear the "text" cache
+                    url = url.replace(/@main|@latest/, '@' + myHash) + "?v=" + Math.floor(Math.random() * 9999);
                 }
                 return n(url, name, specs);
             };
         })(window.open);
+
 
         // 2. LOAD GAMES.JS: Use the hash here too
         const script = document.createElement('script');
