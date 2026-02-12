@@ -36,7 +36,7 @@
     // 3. LOAD GAMES.JS: Fetches the logic file using the Hash bypass
     const script = document.createElement('script');
     // NOTE: If your games.js is NOT in a 'src' folder, remove '/src' from the line below
-    script.src = `https://cdn.jsdelivr.net/gh/${myUser}/${myRepo}@${window.GAME_HASH}/src/games.js`;
+    script.src = `https://cdn.jsdelivr.net/gh/${myUser}/${myRepo}@${window.GAME_HASH}/src/games.js?t=978`;
     
     script.onload = () => { 
         console.log("File found! Checking for buildStash...");
