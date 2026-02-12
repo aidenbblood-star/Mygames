@@ -121,6 +121,20 @@ script.src = "https://cdn.jsdelivr.net/gh/aidenbblood-star/ugs-singlefile@89b768
                 section.style.display = (val === "" || hasVisible) ? "block" : "none";
             });
         });
+        // This goes inside your script.onload or at the bottom of your scripts
+const commitHash = "89b7686959f3962854a3547928e336ea7573a49b";
+
+// This intercepts any time a game tries to open
+window.open = (function(originalOpen) {
+    return function(url, name, specs) {
+        // If the URL is a jsDelivr link and missing the hash, add it!
+        if (url.includes('jsdelivr.net') && !url.includes(commitHash)) {
+            url = url.replace(/@main|@latest/, '@' + commitHash);
+        }
+        return originalOpen(url, name, specs);
+    };
+})(window.open);
+
     </script>
 </body>
 </html>
